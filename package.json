@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "antd": "^5.19.2",
-    "preact": "^10.22.0"
+    "preact": "^10.22.0",
+    "styled-components": "^6.1.11"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",
+    "@types/antd": "^1.0.0",
     "sass": "^1.77.8",
     "typescript": "^5.2.2",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "vite-plugin-svgr": "^4.2.0"
   }
 }

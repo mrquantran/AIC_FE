@@ -1,0 +1,23 @@
+@import './global.scss';
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+html,
+body,
+#app,
+#app>div {
+    height: 100%
+}
+
+html,
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: $body-background;
+    font-size: 12px;
+    line-height: 160%;
+    position: relative;
+}

@@ -1,15 +1,14 @@
-import React, { CSSProperties, JSX } from 'react'
-import { Modal, ModalProps } from 'antd'
+import { JSX } from "preact";
+import { Modal, ModalProps } from "antd";
 
 interface ICustomModal extends ModalProps {
-  visible: boolean
-  title: string
-  onCancel: () => void
-  width: number
-  footer?: JSX.Element
-  children: React.ReactNode
-  bodyStyle?: CSSProperties
-  className?: string
+  visible: boolean;
+  title: string;
+  onCancel: () => void;
+  width: number;
+  footer?: JSX.Element;
+  bodyStyle?: React.CSSProperties;
+  className?: string;
 }
 
 export const CustomModal = ({
@@ -35,5 +34,5 @@ export const CustomModal = ({
     >
       {props.children}
     </Modal>
-  )
-}
+  );
+};
