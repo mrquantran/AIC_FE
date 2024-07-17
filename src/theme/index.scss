@@ -9,7 +9,7 @@
 html,
 body,
 #app,
-#app>div {
+#app>div:not(.tsqd-parent-container) {
     height: 100%
 }
 

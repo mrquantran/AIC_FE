@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
+import { Outlet } from "react-router-dom";
 
 const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
@@ -18,7 +19,6 @@ const StyledHeader = styled(Layout.Header)<{ background: string }>`
   display: flex;
   align-items: center;
 `;
-
 
 const items2: MenuProps["items"] = [
   UserOutlined,
@@ -62,6 +62,12 @@ const MainLayout: React.FC = () => {
             items={items2}
           />
         </Layout.Sider>
+      </Layout>
+  
+      <Layout>
+        <Layout.Content>
+          <Outlet />
+        </Layout.Content>
       </Layout>
     </Layout>
   );

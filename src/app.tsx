@@ -1,8 +1,16 @@
-import { useState } from "preact/hooks";
-import MainLayout from "./layout/MainLayout";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { queryClient } from "./config";
+import { BrowserRouter } from "react-router-dom";
+import { AppRoutes } from "./app.route";
 
 export function App() {
-  const [count, setCount] = useState(0);
-
-  return <MainLayout />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
 }
