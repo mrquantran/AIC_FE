@@ -1,75 +1,95 @@
-import React from "preact/compat";
-import { Layout, Menu, theme, type MenuProps } from "antd";
-import {
-  LaptopOutlined,
-  NotificationOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import React, { useMemo } from "preact/compat";
+import { Layout, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
-import { Outlet } from "react-router-dom";
-
-const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import "./MainLayout.scss";
+import { useRoutes } from "@/hooks";
+import { TSideBarItem } from "@/types";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import { RootPaths } from "@/constants";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
   display: flex;
   align-items: center;
+  padding: 0 16px;
 `;
 
-const items2: MenuProps["items"] = [
-  UserOutlined,
-  LaptopOutlined,
-  NotificationOutlined,
-].map((icon, index) => {
-  const key = String(index + 1);
-
-  return {
-    key: `sub${key}`,
-    icon: icon,
-    label: `subnav ${key}`,
-
-    children: new Array(4).fill(null).map((_, j) => {
-      const subKey = index * 4 + j + 1;
-      return {
-        key: subKey,
-        label: `option${subKey}`,
-      };
-    }),
-  };
-});
+const StyledLayout = styled(Layout)`
+  height: 100%;
+`;
 
 const MainLayout: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const { authorizedRoutes } = useRoutes();
+  const location = useLocation();
+
+  const sideBarItems = useMemo<TSideBarItem[]>(
+    () =>
+      authorizedRoutes
+        .map((route) => {
+          const isShowSubMenu = route.children?.some(
+            ({ showInMenu }) => showInMenu
+          );
+          const newChildren = isShowSubMenu
+            ? route.children
+                ?.map((child) =>
+                  child.showInMenu
+                    ? {
+                        path: child.path,
+                        icon: child.menuIcon,
+                        label: child.menuLabel,
+                      }
+                    : null
+                )
+                .filter(Boolean)
+            : [];
+
+          return route.showInMenu
+            ? {
+                path: route.path,
+                icon: route.menuIcon,
+                label: route.menuLabel,
+                children: newChildren,
+              }
+            : null;
+        })
+        .filter(Boolean) as TSideBarItem[],
+    [authorizedRoutes]
+  );
+
+  const navigate = useNavigate();
+
+  const handleSideBarClick = ({ key }: { key: string }) => {
+    if (key) {
+      navigate(key);
+    }
+  };
+
   return (
-    <Layout>
+    <StyledLayout>
       <StyledHeader background={colorBgContainer}>
         <img src={viteLogo} alt="Vite logo" />
+        <h2 className="title-header">AI Challenge 2024</h2>
       </StyledHeader>
-      <Layout>
-        <Layout.Sider style={{ background: colorBgContainer }}>
-          <Menu
-            theme="light"
-            mode="inline"
-            defaultSelectedKeys={["1"]}
-            defaultOpenKeys={["sub1"]}
-            items={items2}
-          />
-        </Layout.Sider>
-      </Layout>
-  
-      <Layout>
-        <Layout.Content>
-          <Outlet />
-        </Layout.Content>
-      </Layout>
-    </Layout>
+      <StyledLayout>
+        <Sidebar
+          items={sideBarItems}
+          rootPath={RootPaths.HOME}
+          path={location.pathname}
+          onPathChange={handleSideBarClick}
+        />
+        <StyledLayout>
+          <Layout.Content>
+            <Outlet />
+          </Layout.Content>
+        </StyledLayout>
+      </StyledLayout>
+    </StyledLayout>
   );
 };
 

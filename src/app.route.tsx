@@ -4,12 +4,13 @@ import { TRoute } from "./types";
 import { flatten } from "./utils";
 import { CustomNavigate } from "./components";
 import { withCustomErrorBoundary } from "./HOC";
+import { DashboardRoutes } from "@pages/Dashboard";
 
 export const MainLayoutRoutes: TRoute = {
   component: MainLayout,
   path: "/",
   page: "accessible",
-  children: [],
+  children: [...DashboardRoutes],
 };
 
 export const routes: TRoute[] = [MainLayoutRoutes];
@@ -17,7 +18,7 @@ export const routes: TRoute[] = [MainLayoutRoutes];
 export const flattenRoutes = flatten(routes);
 
 const renderRoute = (routes: TRoute[]): React.ReactNode[] =>
-  routes.map(
+  routes?.map(
     ({
       redirectTo,
       children,
@@ -26,15 +27,15 @@ const renderRoute = (routes: TRoute[]): React.ReactNode[] =>
       page,
       permission,
     }) => {
-    //   const AuthComponent = () => (
-    //     <AuthWrapper
-    //       page={page}
-    //       permission={permission}
-    //       fallback={<Unauthorized />}
-    //     >
-    //       <Component />
-    //     </AuthWrapper>
-    //   );
+      //   const AuthComponent = () => (
+      //     <AuthWrapper
+      //       page={page}
+      //       permission={permission}
+      //       fallback={<Unauthorized />}
+      //     >
+      //       <Component />
+      //     </AuthWrapper>
+      //   );
 
       //   Will implement auth component later
       const CustomComponent = withCustomErrorBoundary(

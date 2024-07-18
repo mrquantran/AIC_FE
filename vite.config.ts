@@ -4,8 +4,16 @@ import svgr from "vite-plugin-svgr";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    preact(),
-    svgr(),
-  ],
+  plugins: [preact(), svgr()],
+  resolve: {
+    alias: {
+      "@": "/src",
+      "@components": "/src/components",
+      "@constants": "/src/constants",
+      "@config": "/src/config",
+      "@pages": "/src/pages",
+      "@types": "/src/types",
+      "app.route": "/src/app.route.tsx",
+    },
+  },
 });
