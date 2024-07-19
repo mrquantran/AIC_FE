@@ -19,6 +19,8 @@ const StyledHeader = styled(Layout.Header)<{ background: string }>`
 
 const StyledLayout = styled(Layout)`
   height: 100%;
+
+  padding: ${(props: { padding?: boolean }) => (props.padding ? "2rem" : 0)};
 `;
 
 const MainLayout: React.FC = () => {
@@ -86,7 +88,7 @@ const MainLayout: React.FC = () => {
         />
         <Layout>
           <BuidlingBar />
-          <StyledLayout>
+          <StyledLayout padding={true}>
             <Layout.Content>
               <Outlet />
             </Layout.Content>
