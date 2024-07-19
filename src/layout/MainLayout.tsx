@@ -8,6 +8,7 @@ import { useRoutes } from "@/hooks";
 import { TSideBarItem } from "@/types";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { RootPaths } from "@/constants";
+import BuidlingBar from "@/components/BuildingBar/BuildingBar";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -83,11 +84,14 @@ const MainLayout: React.FC = () => {
           path={location.pathname}
           onPathChange={handleSideBarClick}
         />
-        <StyledLayout>
-          <Layout.Content>
-            <Outlet />
-          </Layout.Content>
-        </StyledLayout>
+        <Layout>
+          <BuidlingBar />
+          <StyledLayout>
+            <Layout.Content>
+              <Outlet />
+            </Layout.Content>
+          </StyledLayout>
+        </Layout>
       </StyledLayout>
     </StyledLayout>
   );
