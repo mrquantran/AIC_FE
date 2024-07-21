@@ -1,5 +1,5 @@
-import React, { useMemo } from "preact/compat";
-import { Layout, theme } from "antd";
+import React, { useMemo, useState } from "preact/compat";
+import { Button, Layout, Space, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -9,12 +9,16 @@ import { TSideBarItem } from "@/types";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { RootPaths } from "@/constants";
 import BuidlingBar from "@/components/BuildingBar/BuildingBar";
+import { StyledFlex } from "@/theme/styled";
+import { SettingOutlined } from "@ant-design/icons";
+import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
   display: flex;
   align-items: center;
   padding: 0 16px;
+  justify-content: space-between;
 `;
 
 const StyledLayout = styled(Layout)`
@@ -24,6 +28,16 @@ const StyledLayout = styled(Layout)`
 `;
 
 const MainLayout: React.FC = () => {
+  const [open, setOpen] = useState(false);
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const closeDrawer = () => {
+    setOpen(false);
+  };
+
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -76,8 +90,13 @@ const MainLayout: React.FC = () => {
   return (
     <StyledLayout>
       <StyledHeader background={colorBgContainer}>
-        <img src={viteLogo} alt="Vite logo" />
-        <h2 className="title-header">AI Challenge 2024</h2>
+        <StyledFlex>
+          <img src={viteLogo} alt="Vite logo" />
+          <h2 className="title-header">AI Challenge 2024</h2>
+        </StyledFlex>
+        <Button onClick={showDrawer}>
+          <SettingOutlined style={{ fontSize: "24px" }} />
+        </Button>
       </StyledHeader>
       <StyledLayout>
         <Sidebar
@@ -95,6 +114,21 @@ const MainLayout: React.FC = () => {
           </StyledLayout>
         </Layout>
       </StyledLayout>
+      <SettingDrawer
+        title="Settings"
+        extra={
+          <Space>
+            <Button onClick={closeDrawer}>Cancel</Button>
+            <Button type="primary" onClick={closeDrawer}>
+              OK
+            </Button>
+          </Space>
+        }
+        open={open}
+        onClose={closeDrawer}
+      >
+        <div>Content</div>
+      </SettingDrawer>
     </StyledLayout>
   );
 };
