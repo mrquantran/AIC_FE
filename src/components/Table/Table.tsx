@@ -2,7 +2,6 @@ import "preact";
 import {
   Table,
   Button,
-  Input,
   message,
   Typography,
   Space,
@@ -41,7 +40,7 @@ const handleAdd = async (fields: Partial<TableListItem>): Promise<boolean> => {
   }
 };
 
-const handleRemove = async (selectedRows: React.Key[]): Promise<boolean> => {
+const handleRemove = async (selectedRows: Key[]): Promise<boolean> => {
   const hide = message.loading("Deleting...");
   if (!selectedRows) return true;
 
@@ -105,7 +104,7 @@ const dummyData = [
 ];
 
 const CustomTable: FunctionComponent = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [data, setData] = useState<TableListItem[]>(dummyData);
   const [loading, setLoading] = useState<boolean>(false);
 

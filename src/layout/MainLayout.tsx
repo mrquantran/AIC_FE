@@ -108,7 +108,7 @@ const MainLayout: React.FC = () => {
         <Layout>
           <BuidlingBar />
           <StyledLayout padding={true}>
-            <Layout.Content>
+            <Layout.Content style={{ overflow: "auto" }}>
               <Outlet />
             </Layout.Content>
           </StyledLayout>

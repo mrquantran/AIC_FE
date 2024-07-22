@@ -8,6 +8,7 @@ import {
   CodepenOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
+import TextQuery from "@/container/TextQuery/TextQuery";
 
 // Type definitions
 interface Tab {
@@ -48,9 +49,9 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       tabs: [
         {
           key: "tab1",
-          tab: <>Tab 1</>,
-          content: <p>Content for Tab 1</p>,
-          icon: FileImageOutlined,
+          tab: <>Text</>,
+          content: <TextQuery />,
+          icon: <FileImageOutlined />,
         },
         {
           key: "tab2",
