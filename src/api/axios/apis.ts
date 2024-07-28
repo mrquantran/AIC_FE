@@ -1,10 +1,4 @@
-import { REST_API_QUERY } from "@/api/urls";
-
-export const REST_API = {
-  // GET /api/v1/health
-  HEALTH: "/api/v1/health",
-  ...REST_API_QUERY
-};
+export const REST_API = {};
 
 export const buildRestUrl = (url: string, data: any) => {
   const keys = Object.keys(data);
@@ -19,6 +13,6 @@ export const buildRestUrl = (url: string, data: any) => {
   return url;
 };
 
-export const apis = [] as const;
+export const apis = ["/v1/query/search"] as const;
 
 export type TApis = (typeof apis)[number];

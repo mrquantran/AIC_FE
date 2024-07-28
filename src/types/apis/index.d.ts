@@ -6,3 +6,14 @@ export type TApiConfig<K = any> = {
 };
 
 export type TApiConfigs = Record<string, TApiConfig>;
+
+export type TMutationOptions<P = any, R = any> = {
+  queryConfig?: Omit<
+    UseMutationOptions<R, TApiError, P>,
+    "mutationKey" | "mutationFn"
+  >;
+};
+
+export type TQueryOptions<R = any> = {
+  queryConfig?: Omit<UseQueryOptions<R, TApiError>, "queryKey" | "queryFn">;
+};

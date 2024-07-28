@@ -1,8 +1,18 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
 import { Image, Row, Col, Card, Space } from "antd";
+import { useSearch } from "@/api/hooks/search";
+import Loading from "@/components/Loading";
 
 export const Dashboard: React.FC = (): JSX.Element => {
+  const queryPermission = useSearch();
+
+  if (queryPermission.isLoading) {
+    return <Loading message="Loading permission..." />;
+  }
+
+  console.log(queryPermission.data);
+
   return (
     <>
       <Table />
