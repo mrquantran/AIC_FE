@@ -87,6 +87,11 @@ const MainLayout: React.FC = () => {
     }
   };
 
+  const handleConfirmSearch = () => {
+    console.log("confirm search");
+    return null;
+  };
+
   return (
     <StyledLayout>
       <StyledHeader background={colorBgContainer}>
@@ -94,9 +99,18 @@ const MainLayout: React.FC = () => {
           <img src={viteLogo} alt="Vite logo" />
           <h2 className="title-header">AI Challenge 2024</h2>
         </StyledFlex>
-        <Button onClick={showDrawer}>
-          <SettingOutlined style={{ fontSize: "24px" }} />
-        </Button>
+        <StyledFlex>
+          <Button
+            type="primary"
+            onClick={handleConfirmSearch}
+            style={{ marginRight: "1rem" }}
+          >
+            Confirm
+          </Button>
+          <Button onClick={showDrawer}>
+            <SettingOutlined style={{ fontSize: "24px" }} />
+          </Button>
+        </StyledFlex>
       </StyledHeader>
       <StyledLayout>
         <Sidebar
