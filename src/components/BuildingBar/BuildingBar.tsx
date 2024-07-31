@@ -5,7 +5,7 @@ import {
   DeleteOutlined,
   FileImageOutlined,
   FileTextOutlined,
-  CodepenOutlined,
+  AudioOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
 import TextQuery from "@/container/TextQuery/TextQuery";
@@ -40,34 +40,38 @@ const StyledContent = styled(Layout.Content)`
 const StyledCard = styled(Card)`
   width: 100%;
   margin-bottom: 1rem;
+
+  .ant-card-body{
+    padding: 18px;
+  }
 `;
 
 const BuidlingBar: Preact.FunctionComponent = () => {
-  const [items, setItems] = Preact.useState<QueryState>([
+  const defaultTab: Tab[] = [
     {
-      key: 1,
-      tabs: [
-        {
-          key: "tab1",
-          tab: <>Text</>,
-          content: <TextQuery />,
-          icon: <FileImageOutlined />,
-        },
-        {
-          key: "tab2",
-          tab: <>Tab 2</>,
-          content: <p>Content for Tab 2</p>,
-          icon: FileTextOutlined,
-        },
-        {
-          key: "tab3",
-          tab: <>Tab 3</>,
-          content: <p>Content for Tab 3</p>,
-          icon: CodepenOutlined,
-        },
-      ],
+      key: "tab1",
+      tab: <>Text</>,
+      content: <TextQuery />,
+      icon: <FileTextOutlined />,
     },
-  ]);
+    {
+      key: "tab2",
+      tab: <>Image</>,
+      content: <p>Content for Tab 2</p>,
+      icon: <FileImageOutlined />,
+    },
+    {
+      key: "tab3",
+      tab: <>Audio</>,
+      content: <p>Content for Tab 3</p>,
+      icon: <AudioOutlined />,
+    },
+  ];
+
+  const [items, setItems] = Preact.useState<QueryState>([{
+    key: 1,
+    tabs: defaultTab,
+  }]);
 
   const handleRemoveQuery = (queryKey: number) => {
     setItems((prevItems) => prevItems.filter((item) => item.key !== queryKey));
@@ -82,27 +86,9 @@ const BuidlingBar: Preact.FunctionComponent = () => {
     const newKey = items.length + 1;
     const newItem: QueryItem = {
       key: newKey,
-      tabs: [
-        {
-          key: "tab1",
-          tab: <>Tab 1</>,
-          content: <p>{`Content for Tab 1 of Query ${newKey}`}</p>,
-          icon: FileImageOutlined,
-        },
-        {
-          key: "tab2",
-          tab: <>Tab 2</>,
-          content: <p>{`Content for Tab 2 of Query ${newKey}`}</p>,
-          icon: FileTextOutlined,
-        },
-        {
-          key: "tab3",
-          tab: <>Tab 3</>,
-          content: <p>{`Content for Tab 3 of Query ${newKey}`}</p>,
-          icon: CodepenOutlined,
-        },
-      ],
-    };
+      tabs: defaultTab
+    }
+    
     setItems((prevItems) => [...prevItems, newItem]);
   };
 
@@ -117,7 +103,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
                   right: (
                     <DeleteOutlined
                       onClick={() => handleRemoveQuery(item.key)}
-                      style={{ marginLeft: "10px", cursor: "pointer" }}
+                      style={{ marginLeft: "10px", cursor: "pointer", color:"red" }}
                     />
                   ),
                 }}
@@ -140,7 +126,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
           ))}
         </Row>
         <Button
-          type="primary"
+          type="dashed"
           style={{ width: "100%" }}
           icon={<PlusOutlined />}
           onClick={handleAddQuery}

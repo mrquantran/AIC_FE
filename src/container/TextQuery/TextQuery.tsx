@@ -12,12 +12,12 @@ const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
 const TextQuery: Preact.FunctionComponent = () => {
   return (
     <div>
-      <span>Categories: </span>
+      {/* <span>Categories: </span>
       <Space>
         <Checkbox>Checkbox</Checkbox>
         <Checkbox>Checkbox</Checkbox>
         <Checkbox>Checkbox</Checkbox>
-      </Space>
+      </Space> */}
       <Space direction="vertical">
         <Search
           placeholder="input search text"

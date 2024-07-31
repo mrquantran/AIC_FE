@@ -12,7 +12,6 @@ import type { TableColumnsType } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "preact/hooks";
 import { FunctionComponent, JSX, Key } from "preact";
-import Card from "antd/es/card/Card";
 
 const { Title } = Typography;
 
@@ -60,49 +59,15 @@ const handleRemove = async (selectedRows: Key[]): Promise<boolean> => {
 
 // Dummy data
 // Dummy data
-const dummyData = [
-  {
-    key: 1,
-    name: 'Keyframe 1',
-    desc: 'This is the first keyframe',
+const dummyData = new Array(16).fill(null).map((_, index) => ({
+    key: index,
+    name: "Keyframe 1",
+    desc: "This is the first keyframe",
     callNo: 823,
     status: 0,
-    updatedAt: '2024-07-19 10:00:00',
-  },
-  {
-    key: 2,
-    name: 'Keyframe 2',
-    desc: 'Processing keyframe',
-    callNo: 645,
-    status: 1,
-    updatedAt: '2024-07-18 15:30:00',
-  },
-  {
-    key: 3,
-    name: 'Keyframe 3',
-    desc: 'Successful keyframe',
-    callNo: 1254,
-    status: 2,
-    updatedAt: '2024-07-17 09:45:00',
-  },
-  {
-    key: 4,
-    name: 'Keyframe 4',
-    desc: 'Error in keyframe',
-    callNo: 327,
-    status: 3,
-    updatedAt: '2024-07-16 14:20:00',
-  },
-  {
-    key: 5,
-    name: 'Keyframe 5',
-    desc: 'Another default keyframe',
-    callNo: 756,
-    status: 0,
-    updatedAt: '2024-07-15 11:10:00',
-  },
-];
-
+    updatedAt: "2024-07-19 10:00:00",
+  }
+))
 const CustomTable: FunctionComponent = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [data, setData] = useState<TableListItem[]>(dummyData);
@@ -182,49 +147,15 @@ const CustomTable: FunctionComponent = () => {
     onChange: onSelectChange,
   };
 
-  const hasSelected: boolean = selectedRowKeys.length > 0;
-
-
-  const CardTitle: JSX.Element = (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Title level={4} style={{ margin: 0 }}>
-        Keyframe Query List
-      </Title>
-      <Space>
-        <Button type="primary" onClick={() => handleAdd({})}>
-          <PlusOutlined /> Add
-        </Button>
-        <Popconfirm
-          title="Are you sure to delete these items?"
-          onConfirm={() => handleRemove(selectedRowKeys)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button disabled={!hasSelected}>Delete</Button>
-        </Popconfirm>
-      </Space>
-    </div>
-  );
-
   return (
-    <Card
-      title={CardTitle}
-      extra={hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
-    >
-      <Table<TableListItem>
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={data}
-        rowKey="key"
-        loading={loading}
-      />
-    </Card>
+    <Table<TableListItem>
+      rowSelection={rowSelection}
+      columns={columns}
+      pagination={{ position: ["bottomCenter"] }}
+      dataSource={data}
+      rowKey="key"
+      loading={loading}
+    />
   );
 };
 
