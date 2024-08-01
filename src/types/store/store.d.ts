@@ -1,3 +1,4 @@
+import { selectSearchState } from '@/store/selectors/search.selectors';
 import { Action } from 'redux'
 import { TAppState } from './portal.type'
 import { TAuthState } from './auth.type'
@@ -16,5 +17,5 @@ export interface IAppAction<T = any, P = any> extends Action {
 
 export type TRootState = {
   appState: TAppState
-  authState: TAuthState
+  searchState: TSearchState
 }

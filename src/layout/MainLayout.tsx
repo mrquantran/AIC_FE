@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "preact/compat";
+import React, { useEffect, useMemo, useState } from "preact/compat";
 import { Button, Layout, Space, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
@@ -13,6 +13,12 @@ import { StyledFlex } from "@/theme/styled";
 import { SettingOutlined } from "@ant-design/icons";
 import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
 import { AppError } from "@/components/ErrorHandler";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchKeyframes } from "@/api/hooks/search";
+import { submitSearchQuery } from "@/store/actions";
+import Loading from "@/components/Loading";
+import { TRootState } from "@/types/store";
+import Toast from "@/components/Toast";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -29,6 +35,10 @@ const StyledLayout = styled(Layout)`
 `;
 
 const MainLayout: React.FC = () => {
+  const dispatch = useDispatch();
+  const searchTerm = useSelector(
+    (state: TRootState) => state?.searchState?.searchTerm
+  );
   const [open, setOpen] = useState(false);
 
   const showDrawer = () => {
@@ -88,9 +98,22 @@ const MainLayout: React.FC = () => {
     }
   };
 
+  const { mutate, isSuccess } = useSearchKeyframes();
+
+  useEffect(() => {
+    if (isSuccess) {
+      Toast("Search success", "success");
+    }
+  }, [isSuccess]);
+
   const handleConfirmSearch = () => {
-    console.log("confirm search");
-    return null;
+    dispatch(submitSearchQuery());
+    mutate([
+      {
+        model: "Text",
+        value: searchTerm,
+      },
+    ]);
   };
 
   return (
@@ -144,7 +167,7 @@ const MainLayout: React.FC = () => {
       >
         <div>Content</div>
       </SettingDrawer>
-      <AppError/>
+      <AppError />
     </StyledLayout>
   );
 };

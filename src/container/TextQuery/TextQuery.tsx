@@ -1,41 +1,36 @@
 import { Input, Space } from "antd";
-import Preact, { useState } from "preact/compat";
-import { useSearchKeyframes } from "@/api/hooks/search";
+import Preact from "preact/compat";
+import { useDispatch, useSelector } from "react-redux";
+import { setSearchTerm } from "@/store/actions";
+
+const { TextArea } = Input;
 
 const TextQuery: Preact.FunctionComponent = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const dispatch = useDispatch();
+  const searchTerm = useSelector((state) => state?.search?.searchTerm);
 
-  const { mutate: searchKeyframes, isPending: isMutating } =
-    useSearchKeyframes();
-
-    const handleKeyframeSubmit = () => {
-      // Trigger mutation with the payload
-      searchKeyframes([
-        {
-          model: "Text",
-          value:  searchTerm
-        }
-      ]);
-    };
+  const handleSearchTermChange = (e: any) => {
+    dispatch(setSearchTerm(e.target.value));
+  };
   
   return (
-    <div>
+    <>
       {/* <span>Categories: </span>
       <Space>
         <Checkbox>Checkbox</Checkbox>
         <Checkbox>Checkbox</Checkbox>
         <Checkbox>Checkbox</Checkbox>
       </Space> */}
-      <Space direction="vertical">
-        <Input
-          onChange={(e) => setSearchTerm(e.target.value)}
+      <Space direction="vertical" style={{ width: "100%" }}>
+        <TextArea
+          style={{ width: "100%" }}
+          onChange={handleSearchTermChange}
           placeholder="input search text"
           allowClear
           value={searchTerm}
-          style={{ width: 200 }}
         />
       </Space>
-    </div>
+    </>
   );
 };
 

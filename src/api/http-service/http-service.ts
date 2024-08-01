@@ -23,7 +23,6 @@ class HttpRestService {
   }
 
   async get<T>(route: string, configs?: AxiosRequestConfig): Promise<T> {
-    console.log('get', route)
     return this.axiosInstance
       .get(route, configs)
       .then(data => _.get(data, 'data'))
@@ -34,8 +33,7 @@ class HttpRestService {
     route: string,
     payload?: P,
     configs?: AxiosRequestConfig
-  ): Promise<R> {
-    console.log('post')
+  ): Promise<R> {   
     return this.axiosInstance
       .post(route, payload, configs)
       .then(data => _.get(data, 'data'))
@@ -47,7 +45,6 @@ class HttpRestService {
     payload?: P,
     configs?: AxiosRequestConfig
   ): Promise<R> {
-    console.log('patch')
     return this.axiosInstance
       .patch(route, payload, configs)
       .then(data => _.get(data, 'data'))
@@ -59,7 +56,6 @@ class HttpRestService {
     payload?: P,
     configs?: AxiosRequestConfig
   ): Promise<R> {
-    console.log('put')
     return this.axiosInstance
       .put(route, payload, configs)
       .then(data => _.get(data, 'data'))

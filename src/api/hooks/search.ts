@@ -1,11 +1,7 @@
 import { TApiError } from "api/errors";
 import { TQueryOptions } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  getRecordByIndex,
-  HttpService,
-  searchKeyframes,
-} from "../http-service";
+import { getRecordByIndex, searchKeyframes } from "../http-service";
 
 export function useSearch(request?: TQueryOptions) {
   return useQuery<any, TApiError>({
@@ -16,6 +12,6 @@ export function useSearch(request?: TQueryOptions) {
 
 export function useSearchKeyframes(request?: TQueryOptions) {
   return useMutation<void, TApiError, TSearchKeyframeayload[]>({
-    mutationFn: (payload) => searchKeyframes(payload)
+    mutationFn: (payload) => searchKeyframes(payload),
   });
 }
