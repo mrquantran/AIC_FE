@@ -41,37 +41,41 @@ const StyledCard = styled(Card)`
   width: 100%;
   margin-bottom: 1rem;
 
-  .ant-card-body{
+  .ant-card-body {
     padding: 18px;
   }
 `;
 
 const BuidlingBar: Preact.FunctionComponent = () => {
-  const defaultTab: Tab[] = [
-    {
-      key: "tab1",
-      tab: <>Text</>,
-      content: <TextQuery />,
-      icon: <FileTextOutlined />,
-    },
-    {
-      key: "tab2",
-      tab: <>Image</>,
-      content: <p>Content for Tab 2</p>,
-      icon: <FileImageOutlined />,
-    },
-    {
-      key: "tab3",
-      tab: <>Audio</>,
-      content: <p>Content for Tab 3</p>,
-      icon: <AudioOutlined />,
-    },
-  ];
+  const renderDefaultTab = (key: number): Tab[] => {
+    return [
+      {
+        key: `tabText${key}`,
+        tab: <>Text</>,
+        content: <TextQuery tabKey={key} />,
+        icon: <FileTextOutlined />,
+      },
+      {
+        key: `tabImage${key}`,
+        tab: <>Image</>,
+        content: <p>Content for Tab 2</p>,
+        icon: <FileImageOutlined />,
+      },
+      {
+        key: `tabAudio${key}`,
+        tab: <>Audio</>,
+        content: <p>Content for Tab 3</p>,
+        icon: <AudioOutlined />,
+      },
+    ];
+  };
 
-  const [items, setItems] = Preact.useState<QueryState>([{
-    key: 1,
-    tabs: defaultTab,
-  }]);
+  const [items, setItems] = Preact.useState<QueryState>([
+    {
+      key: 1,
+      tabs: renderDefaultTab(1),
+    },
+  ]);
 
   const handleRemoveQuery = (queryKey: number) => {
     setItems((prevItems) => prevItems.filter((item) => item.key !== queryKey));
@@ -86,9 +90,9 @@ const BuidlingBar: Preact.FunctionComponent = () => {
     const newKey = items.length + 1;
     const newItem: QueryItem = {
       key: newKey,
-      tabs: defaultTab
-    }
-    
+      tabs: renderDefaultTab(newKey),
+    };
+
     setItems((prevItems) => [...prevItems, newItem]);
   };
 
@@ -103,7 +107,11 @@ const BuidlingBar: Preact.FunctionComponent = () => {
                   right: (
                     <DeleteOutlined
                       onClick={() => handleRemoveQuery(item.key)}
-                      style={{ marginLeft: "10px", cursor: "pointer", color:"red" }}
+                      style={{
+                        marginLeft: "10px",
+                        cursor: "pointer",
+                        color: "red",
+                      }}
                     />
                   ),
                 }}

@@ -1,36 +1,37 @@
+// TextQuery.tsx
 import { Input, Space } from "antd";
 import Preact from "preact/compat";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchTerm } from "@/store/actions";
+import { TAppRootReducer } from "@/store";
 
 const { TextArea } = Input;
 
-const TextQuery: Preact.FunctionComponent = () => {
+interface ITextQuery {
+  tabKey: number;
+}
+
+const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   const dispatch = useDispatch();
-  const searchTerm = useSelector((state) => state?.search?.searchTerm);
+  const searchTab = useSelector((state: TAppRootReducer) =>
+    state?.searchState?.search.find((s) => s.tabKey === tabKey)
+  );
 
   const handleSearchTermChange = (e: any) => {
-    dispatch(setSearchTerm(e.target.value));
+    dispatch(setSearchTerm("Text", e.target.value, tabKey));
   };
-  
+
   return (
-    <>
-      {/* <span>Categories: </span>
-      <Space>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-      </Space> */}
-      <Space direction="vertical" style={{ width: "100%" }}>
-        <TextArea
-          style={{ width: "100%" }}
-          onChange={handleSearchTermChange}
-          placeholder="input search text"
-          allowClear
-          value={searchTerm}
-        />
-      </Space>
-    </>
+    <Space direction="vertical" style={{ width: "100%" }}>
+      <TextArea
+        key={tabKey}
+        style={{ width: "100%" }}
+        onChange={handleSearchTermChange}
+        placeholder="input search text"
+        allowClear
+        value={searchTab?.value}
+      />
+    </Space>
   );
 };
 

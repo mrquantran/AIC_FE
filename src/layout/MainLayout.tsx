@@ -16,9 +16,9 @@ import { AppError } from "@/components/ErrorHandler";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
 import { submitSearchQuery } from "@/store/actions";
-import Loading from "@/components/Loading";
 import { TRootState } from "@/types/store";
 import Toast from "@/components/Toast";
+import { TAppRootReducer } from "@/store";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -36,8 +36,8 @@ const StyledLayout = styled(Layout)`
 
 const MainLayout: React.FC = () => {
   const dispatch = useDispatch();
-  const searchTerm = useSelector(
-    (state: TRootState) => state?.searchState?.searchTerm
+  const searchItems = useSelector(
+    (state: TAppRootReducer) => state.searchState.search
   );
   const [open, setOpen] = useState(false);
 
@@ -106,14 +106,14 @@ const MainLayout: React.FC = () => {
     }
   }, [isSuccess]);
 
-  const handleConfirmSearch = () => {
+  const handleSearch = () => {
     dispatch(submitSearchQuery());
-    mutate([
-      {
-        model: "Text",
-        value: searchTerm,
-      },
-    ]);
+    mutate(
+      searchItems.map((item) => ({
+        model: item.model,
+        value: item.value,
+      }))
+    );
   };
 
   return (
@@ -126,7 +126,7 @@ const MainLayout: React.FC = () => {
         <StyledFlex>
           <Button
             type="primary"
-            onClick={handleConfirmSearch}
+            onClick={handleSearch}
             style={{ marginRight: "1rem" }}
           >
             Confirm
