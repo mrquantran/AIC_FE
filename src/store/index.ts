@@ -10,7 +10,9 @@ import { persistReducer, persistStore } from 'redux-persist'
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: [],
+  whitelist: [
+    'appState', // only navigation will be persisted
+  ],
   blacklist: [],
 }
 

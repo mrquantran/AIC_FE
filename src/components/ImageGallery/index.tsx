@@ -1,5 +1,5 @@
 import Preact from "preact/compat";
-import { Button, Col, Image, Row } from "antd";
+import { Button, Col, Empty, Image, Row } from "antd";
 import { appConfig } from "@/config/appConfig";
 
 type IImageGalleryProps = {
@@ -24,15 +24,19 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     if (showConfidence) {
       return images.sort((a, b) => b.confidence - a.confidence).slice(0, 5);
     }
-      
-    return images
+
+    return images;
   };
+
+  if (images.length === 0) {
+    return <Empty />;
+  }
 
   return (
     <>
       <Row gutter={[16, 16]}>
         {image_sorted(images)?.map((image) => (
-            <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
+          <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
             {/* @ts-ignore */}
             <Image width={200} src={image_path + image.value} />
             {showConfidence && (

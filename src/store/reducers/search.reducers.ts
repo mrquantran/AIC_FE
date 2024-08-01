@@ -12,33 +12,43 @@ export type TSearch = {
 
 export type TSearchState = {
   searchResult: {
-    data: any[];
+    data: any;
     total: number;
   };
   search: TSearch[];
 };
 
-const try_text =
-  "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one and then all three phones appear together.";
-
-const initialSearchState: TSearchState = {
-  searchResult: {
-    data: [],
-    total: 0,
+const trySearchState: TSearch[] = [
+  {
+    tabKey: 1,
+    model: "Text",
+    value:
+      "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one and then all three phones appear together.",
   },
-  search: [
-    {
-      tabKey: 1,
-      model: "Text",
-      value: "",
+];
+
+const defaultSearchState: TSearch[] = [
+  {
+    tabKey: 1,
+    model: "Text",
+    value: "",
+  },
+];
+
+export const getInitialSearchState = (x: boolean) => {
+  return {
+    searchResult: {
+      data: [],
+      total: 0,
     },
-  ],
+    search: x ? trySearchState : defaultSearchState,
+  };
 };
 
 export type TSearchActionType = ActionType<typeof actions>;
 
 export default (
-  state: TSearchState = initialSearchState,
+  state: TSearchState = getInitialSearchState(false),
   action: TSearchActionType
 ): TSearchState => {
   switch (action.type) {
@@ -71,7 +81,7 @@ export default (
       }
     }
     case getType(actions.clearSearchQuery):
-      return initialSearchState;
+      return getInitialSearchState(false);
     case getType(actions.setSearchResult):
       return update(state, {
         searchResult: {
@@ -83,8 +93,27 @@ export default (
       return update(state, {
         search: {
           0: {
-            value: { $set: try_text },
+            value: { $set: trySearchState[0].value },
           },
+        },
+      });
+    case getType(actions.setRemoveQuery):
+      return update(state, {
+        search: {
+          $apply: (searchArray: TSearch[]) =>
+            searchArray.filter((item) => item.tabKey !== action.payload),
+        },
+      });
+    case getType(actions.setAddQuery):
+      return update(state, {
+        search: {
+          $push: [
+            {
+              tabKey: action.payload,
+              model: "Text",
+              value: "",
+            },
+          ],
         },
       });
     default:

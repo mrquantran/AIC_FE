@@ -1,4 +1,4 @@
-import Preact, { JSX, ReactNode } from "preact/compat";
+import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
 import { Button, Card, Layout, Row, Tabs } from "antd";
 import {
   PlusOutlined,
@@ -9,6 +9,10 @@ import {
 } from "@ant-design/icons";
 import styled from "styled-components";
 import TextQuery from "@/container/TextQuery/TextQuery";
+import { useDispatch, useSelector } from "react-redux";
+import { TAppRootReducer } from "@/store";
+import Toast from "../Toast";
+import { setRemoveQuery } from "@/store/actions";
 
 // Type definitions
 interface Tab {
@@ -47,43 +51,69 @@ const StyledCard = styled(Card)`
 `;
 
 const BuidlingBar: Preact.FunctionComponent = () => {
+  const dispatch = useDispatch();
+  const settings = useSelector(
+    (state: TAppRootReducer) => state.appState.settings
+  );
+  const search = useSelector(
+    (state: TAppRootReducer) => state.searchState.search
+  );
+
+  const styleIcon = { marginRight: "0.5rem" };
+
   const renderDefaultTab = (key: number): Tab[] => {
     return [
       {
         key: `tabText${key}`,
-        tab: <>Text</>,
+        tab: "Text",
         content: <TextQuery tabKey={key} />,
-        icon: <FileTextOutlined />,
+        icon: <FileTextOutlined style={styleIcon} />,
       },
       {
         key: `tabImage${key}`,
-        tab: <>Image</>,
+        tab: "Image",
         content: <p>Content for Tab 2</p>,
-        icon: <FileImageOutlined />,
+        icon: <FileImageOutlined style={styleIcon} />,
       },
       {
         key: `tabAudio${key}`,
-        tab: <>Audio</>,
+        tab: "Audio",
         content: <p>Content for Tab 3</p>,
-        icon: <AudioOutlined />,
+        icon: <AudioOutlined style={styleIcon} />,
       },
     ];
   };
 
-  const [items, setItems] = Preact.useState<QueryState>([
+  const defaultItems = [
     {
       key: 1,
       tabs: renderDefaultTab(1),
     },
-  ]);
+  ];
+
+  const [items, setItems] = Preact.useState<QueryState>(defaultItems);
+
+  useEffect(() => {
+    if (search.length === 1) {
+      setItems(defaultItems);
+    }
+  }, [search.length]);
 
   const handleRemoveQuery = (queryKey: number) => {
+    if (items.length === 1) {
+      Toast("You must have at least one query", "error");
+      return;
+    }
     setItems((prevItems) => prevItems.filter((item) => item.key !== queryKey));
+    dispatch(setRemoveQuery(queryKey));
   };
 
   const handleAddQuery = () => {
-    if (items.length >= 5) {
-      alert("You can't add more than 5 queries");
+    if (items.length >= settings.maxQuery) {
+      Toast(
+        `You have reached the maximum ${settings.maxQuery} number of queries`,
+        "error"
+      );
       return;
     }
 

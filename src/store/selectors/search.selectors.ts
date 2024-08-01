@@ -8,6 +8,6 @@ const getSearchState = (state: { search: TSearchState }) => state.search;
 export const selectSearchState = createSelector(
   [getSearchState],
   (searchState) => ({
-    searchTerm: searchState.searchTerm
+    searchTerm: searchState.search
   })
 );

@@ -21,3 +21,13 @@ export const setSearchResult = createAction(
   "@search/SET_SEARCH_RESULT",
   (result: any) => result
 )();
+
+export const setRemoveQuery = createAction(
+  "@search/SET_REMOVE_QUERY",
+  (index: number) => index
+)();
+
+export const setAddQuery = createAction(
+  "@search/SET_ADD_QUERY",
+  (tabKey: number) => tabKey
+)();

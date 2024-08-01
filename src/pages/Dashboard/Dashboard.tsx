@@ -1,8 +1,6 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
-import { Image, Row, Col, Card, Space, Radio, Button, Tag } from "antd";
-import { useSearch } from "@/api/hooks/search";
-import Loading from "@/components/Loading";
+import { Card, Radio, Tag } from "antd";
 import { useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
@@ -11,14 +9,9 @@ import { TAppRootReducer } from "@/store";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const [mode, setMode] = useState<"image" | "table">("image");
-  const queryPermission = useSearch();
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
-
-  if (queryPermission.isLoading) {
-    return <Loading message="Loading permission..." />;
-  }
 
   const handleModeChange = (e: any) => {
     setMode(e.target.value);

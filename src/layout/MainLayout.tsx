@@ -28,6 +28,8 @@ import {
 } from "@/store/actions";
 import Toast from "@/components/Toast";
 import { TAppRootReducer } from "@/store";
+import SettingSearch from "@/container/Settings";
+import Loading from "@/components/Loading";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -47,6 +49,9 @@ const MainLayout: React.FC = () => {
   const dispatch = useDispatch();
   const searchItems = useSelector(
     (state: TAppRootReducer) => state.searchState.search
+  );
+  const settings = useSelector(
+    (state: TAppRootReducer) => state.appState.settings
   );
   const [open, setOpen] = useState(false);
 
@@ -107,7 +112,9 @@ const MainLayout: React.FC = () => {
     }
   };
 
-  const { mutate, data, isSuccess } = useSearchKeyframes();
+  const { mutate, data, isSuccess, isPending } = useSearchKeyframes({
+    vector_search: settings.vectorSearch,
+  });
 
   useEffect(() => {
     if (isSuccess) {
@@ -118,8 +125,8 @@ const MainLayout: React.FC = () => {
   }, [isSuccess]);
 
   const handleSearch = () => {
-    const isAllEmpty = searchItems.some((item) => item.value === "");
-    if (isAllEmpty) {
+    const isAllEmpty = searchItems.every((item) => item.value !== "");
+    if (!isAllEmpty) {
       Toast(`Please fill the input`, "error");
       return;
     }
@@ -142,6 +149,7 @@ const MainLayout: React.FC = () => {
 
   return (
     <StyledLayout>
+      {isPending ? <Loading /> : null}
       <StyledHeader background={colorBgContainer}>
         <StyledFlex>
           <img src={viteLogo} alt="Vite logo" />
@@ -198,15 +206,12 @@ const MainLayout: React.FC = () => {
         extra={
           <Space>
             <Button onClick={closeDrawer}>Cancel</Button>
-            <Button type="primary" onClick={closeDrawer}>
-              OK
-            </Button>
           </Space>
         }
         open={open}
         onClose={closeDrawer}
       >
-        <div>Content</div>
+        <SettingSearch />
       </SettingDrawer>
       <AppError />
     </StyledLayout>
