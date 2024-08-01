@@ -18,6 +18,9 @@ export type TSearchState = {
   search: TSearch[];
 };
 
+const try_text =
+  "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one and then all three phones appear together.";
+
 const initialSearchState: TSearchState = {
   searchResult: {
     data: [],
@@ -27,8 +30,7 @@ const initialSearchState: TSearchState = {
     {
       tabKey: 1,
       model: "Text",
-      value:
-        "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one and then all three phones appear together.",
+      value: "",
     },
   ],
 };
@@ -75,6 +77,14 @@ export default (
         searchResult: {
           data: { $set: action.payload.data },
           total: { $set: action.payload.total },
+        },
+      });
+    case getType(actions.trySearchQuery):
+      return update(state, {
+        search: {
+          0: {
+            value: { $set: try_text },
+          },
         },
       });
     default:

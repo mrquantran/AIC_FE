@@ -24,6 +24,7 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
       <TextArea
+        rows={5}
         key={tabKey}
         style={{ width: "100%" }}
         onChange={handleSearchTermChange}

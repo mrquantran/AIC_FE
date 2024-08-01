@@ -10,13 +10,22 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { RootPaths } from "@/constants";
 import BuidlingBar from "@/components/BuildingBar/BuildingBar";
 import { StyledFlex } from "@/theme/styled";
-import { SettingOutlined } from "@ant-design/icons";
+import {
+  SettingOutlined,
+  BulbOutlined,
+  ClearOutlined,
+  ScanOutlined,
+} from "@ant-design/icons";
 import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
 import { AppError } from "@/components/ErrorHandler";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
-import { setSearchResult, submitSearchQuery } from "@/store/actions";
-import { TRootState } from "@/types/store";
+import {
+  clearSearchQuery,
+  setSearchResult,
+  submitSearchQuery,
+  trySearchQuery,
+} from "@/store/actions";
 import Toast from "@/components/Toast";
 import { TAppRootReducer } from "@/store";
 
@@ -109,6 +118,11 @@ const MainLayout: React.FC = () => {
   }, [isSuccess]);
 
   const handleSearch = () => {
+    const isAllEmpty = searchItems.some((item) => item.value === "");
+    if (isAllEmpty) {
+      Toast(`Please fill the input`, "error");
+      return;
+    }
     dispatch(submitSearchQuery());
     mutate(
       searchItems.map((item) => ({
@@ -116,6 +130,14 @@ const MainLayout: React.FC = () => {
         value: item.value,
       }))
     );
+  };
+
+  const handleClickClearButton = () => {
+    dispatch(clearSearchQuery());
+  };
+
+  const handleClickTryButton = () => {
+    dispatch(trySearchQuery());
   };
 
   return (
@@ -127,9 +149,26 @@ const MainLayout: React.FC = () => {
         </StyledFlex>
         <StyledFlex>
           <Button
+            type="default"
+            onClick={handleClickTryButton}
+            style={{ marginRight: "1rem" }}
+            icon={<BulbOutlined />}
+          >
+            Try it
+          </Button>
+          <Button
+            type="dashed"
+            onClick={handleClickClearButton}
+            style={{ marginRight: "1rem" }}
+            icon={<ClearOutlined />}
+          >
+            Clear
+          </Button>
+          <Button
             type="primary"
             onClick={handleSearch}
             style={{ marginRight: "1rem" }}
+            icon={<ScanOutlined />}
           >
             Confirm
           </Button>

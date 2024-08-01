@@ -11,9 +11,6 @@ import { TAppRootReducer } from "@/store";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const [mode, setMode] = useState<"image" | "table">("image");
-  const [random, setRandom] = useState<number>(
-    Math.floor(Math.random() * 100) + 1
-  );
   const queryPermission = useSearch();
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
@@ -47,7 +44,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
               <Radio.Button value="table">Table</Radio.Button>
             </Radio.Group>
             <Tag color="magenta" style={{ marginLeft: "1rem" }}>
-              {16} images
+              {searchResult.total} images
             </Tag>
           </StyledFlex>
         }
