@@ -13,6 +13,7 @@ export default defineConfig({
       "@config": "/src/config",
       "@pages": "/src/pages",
       "@types": "/src/types",
+      "@store": "/src/store",
       "app.route": "/src/app.route.tsx",
     },
   },

@@ -9,3 +9,12 @@ export const getRecordByIndex = async (): Promise<any> => {
         }
   });
 };
+
+export const searchKeyframes = async (
+  payload: TSearchKeyframeayload[]
+): Promise<any> => {
+  return HttpService.post<TSearchKeyframeayload[], any>(
+    REST_API.SEARCH_KEYFRAMES.uri,
+    payload
+  );
+};

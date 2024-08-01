@@ -16,6 +16,7 @@
       "@constants/*": ["constants/*"],
       "@pages/*": ["pages/*"],
       "@types/*": ["types/*"],
+      "@store/*": ["store/*"],
     },
     "baseUrl": "./src",
 

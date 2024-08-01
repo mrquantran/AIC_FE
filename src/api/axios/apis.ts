@@ -13,6 +13,6 @@ export const buildRestUrl = (url: string, data: any) => {
   return url;
 };
 
-export const apis = ["/v1/query/search"] as const;
+export const apis = ["/api/v1/query"] as const;
 
 export type TApis = (typeof apis)[number];
