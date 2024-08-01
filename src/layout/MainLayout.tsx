@@ -12,6 +12,7 @@ import BuidlingBar from "@/components/BuildingBar/BuildingBar";
 import { StyledFlex } from "@/theme/styled";
 import { SettingOutlined } from "@ant-design/icons";
 import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
+import { AppError } from "@/components/ErrorHandler";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -143,6 +144,7 @@ const MainLayout: React.FC = () => {
       >
         <div>Content</div>
       </SettingDrawer>
+      <AppError/>
     </StyledLayout>
   );
 };

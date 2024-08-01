@@ -1,4 +1,4 @@
-import { appConfig } from '@/config/appConfig'
+// import { appConfig } from '@/config/appConfig'
 import axios, { AxiosInstance } from 'axios'
 
 // Create a new Axios instance

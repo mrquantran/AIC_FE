@@ -1,6 +1,7 @@
 import { TMessageError } from "@/types";
 import { AxiosError } from "axios";
-// import { setAppError, signOutRequest } from 'store/actions'
+import { setAppError } from '@store/actions'
+import { store } from "@store/index";
 
 export class ApiError extends Error {
   message: string;
@@ -46,13 +47,13 @@ export const HandleResponseError = (
 
   if (typeof error?.response?.data?.message === "string") {
     // dispath app message error
-    // store.dispatch(setAppError(error.response.data.message))
+    store.dispatch(setAppError(error.response.data.message))
 
     throw new ApiError(error.response.data.message, error.response?.status);
   }
 
   // dispath app message error
-  // store.dispatch(setAppError('Unknow'))
+  store.dispatch(setAppError('Unknow'))
 
   throw new ApiError("Unknow", 400);
 };
@@ -62,7 +63,7 @@ export const handleErrorApi = (error: ApiError | ApiErrorForm) => {
     // store.dispatch(signOutRequest())
   } else {
     if (error.name === "ApiError") {
-      // store.dispatch(setAppError(error.message))
+      store.dispatch(setAppError(error.message))
     }
   }
 };
