@@ -11,10 +11,18 @@ export type TSearch = {
 };
 
 export type TSearchState = {
+  searchResult: {
+    data: any[];
+    total: number;
+  };
   search: TSearch[];
 };
 
 const initialSearchState: TSearchState = {
+  searchResult: {
+    data: [],
+    total: 0,
+  },
   search: [
     {
       tabKey: 1,
@@ -60,8 +68,15 @@ export default (
         });
       }
     }
-    case getType(actions.submitSearchQuery):
+    case getType(actions.clearSearchQuery):
       return initialSearchState;
+    case getType(actions.setSearchResult):
+      return update(state, {
+        searchResult: {
+          data: { $set: action.payload.data },
+          total: { $set: action.payload.total },
+        },
+      });
     default:
       return state;
   }

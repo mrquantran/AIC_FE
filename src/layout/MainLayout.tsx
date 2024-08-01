@@ -15,7 +15,7 @@ import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
 import { AppError } from "@/components/ErrorHandler";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
-import { submitSearchQuery } from "@/store/actions";
+import { setSearchResult, submitSearchQuery } from "@/store/actions";
 import { TRootState } from "@/types/store";
 import Toast from "@/components/Toast";
 import { TAppRootReducer } from "@/store";
@@ -98,11 +98,13 @@ const MainLayout: React.FC = () => {
     }
   };
 
-  const { mutate, isSuccess } = useSearchKeyframes();
+  const { mutate, data, isSuccess } = useSearchKeyframes();
 
   useEffect(() => {
     if (isSuccess) {
       Toast("Search success", "success");
+      console.log("Search result", data);
+      dispatch(setSearchResult(data));
     }
   }, [isSuccess]);
 

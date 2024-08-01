@@ -5,6 +5,9 @@ import { useSearch } from "@/api/hooks/search";
 import Loading from "@/components/Loading";
 import { useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
+import ImageGallery from "@/components/ImageGallery";
+import { useSelector } from "react-redux";
+import { TAppRootReducer } from "@/store";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const [mode, setMode] = useState<"image" | "table">("image");
@@ -12,6 +15,9 @@ export const Dashboard: React.FC = (): JSX.Element => {
     Math.floor(Math.random() * 100) + 1
   );
   const queryPermission = useSearch();
+  const searchResult = useSelector(
+    (state: TAppRootReducer) => state.searchState.searchResult
+  );
 
   if (queryPermission.isLoading) {
     return <Loading message="Loading permission..." />;
@@ -25,22 +31,11 @@ export const Dashboard: React.FC = (): JSX.Element => {
     <>
       {/* @ts-ignore */}
       <Card style={{ marginBottom: "2rem " }} title="Top 5 confident image">
-        <Row gutter={20}>
-          {[1, 2, 3, 4, 5].map((index) => (
-            <Col key={index}>
-              <Space direction="vertical">
-                {/* @ts-ignore */}
-                <Image
-                  width={200}
-                  src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-                />
-                <p>
-                  Confident: <strong>{random}%</strong>
-                </p>
-              </Space>
-            </Col>
-          ))}
-        </Row>
+        <ImageGallery
+          images={searchResult?.data}
+          showConfidence={true}
+          total={searchResult?.total}
+        />
       </Card>
       {/* @ts-ignore */}
       <Card
@@ -58,24 +53,12 @@ export const Dashboard: React.FC = (): JSX.Element => {
         }
       >
         {mode === "image" ? (
-          <div>
-            <Row gutter={[16, 16]}>
-              {new Array(12).fill(null).map((_, index) => (
-                <Col key={index} xs={24} sm={12} md={8} lg={6} xl={4}>
-                  {/* @ts-ignore */}
-                  <Image
-                    width={200}
-                    src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-                  />
-                </Col>
-              ))}
-            </Row>
-            <Row justify="center" style={{ marginTop: 16 }}>
-              <Button>Show More</Button>
-            </Row>
-          </div>
+          <ImageGallery
+            images={searchResult?.data}
+            total={searchResult?.total}
+          />
         ) : (
-          <Table />
+          <Table data={searchResult?.data} />
         )}
       </Card>
     </>

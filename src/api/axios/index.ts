@@ -1,9 +1,11 @@
-// import { appConfig } from '@/config/appConfig'
+import { appConfig } from '@/config/appConfig'
 import axios, { AxiosInstance } from 'axios'
+
+console.log(appConfig)
 
 // Create a new Axios instance
 export const InstanceAxios: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: appConfig.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
