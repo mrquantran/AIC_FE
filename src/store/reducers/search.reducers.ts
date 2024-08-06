@@ -23,7 +23,7 @@ const trySearchState: TSearch[] = [
     tabKey: 1,
     model: "Text",
     value:
-      "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one and then all three phones appear together.",
+      "The video shows three Samsung phones at the product launch. Initially, each phone appears one by one, and then all three phones appear together.",
   },
 ];
 

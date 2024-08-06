@@ -1,5 +1,5 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
-import { Button, Card, Layout, Row, Tabs } from "antd";
+import { Button, Card, Layout, Modal, Row, Space, Tabs, Tag } from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -36,9 +36,17 @@ const StyledContent = styled(Layout.Content)`
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  height: 100%;
   width: 100%;
+  height: 95%;
   overflow-y: auto;
+`;
+
+const RowHeaderStyled = styled(Row)`
+  width: 95%;
+  margin: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const StyledCard = styled(Card)`
@@ -60,6 +68,27 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   );
 
   const styleIcon = { marginRight: "0.5rem" };
+
+  const previewModal = () => {
+    Modal.info({
+      title: "Preview Query",
+      content: (
+        <Space>
+          {items.map((item) => (
+            <div key={item.key}>
+              <h3>Query {item.key}</h3>
+              <ul>
+                {item.tabs.map((tab) => (
+                  <li key={tab.key}>content</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </Space>
+      ),
+      onOk() {},
+    });
+  };
 
   const renderDefaultTab = (key: number): Tab[] => {
     return [
@@ -128,6 +157,10 @@ const BuidlingBar: Preact.FunctionComponent = () => {
 
   return (
     <Layout.Sider theme="light" width="25%">
+      <RowHeaderStyled direction="horizontal">
+        <Button onClick={previewModal}>Preview</Button>
+        <Tag color="blue">{items.length}</Tag>
+      </RowHeaderStyled>
       <StyledContent>
         <Row style={{ width: "100%" }}>
           {items.map((item) => (
