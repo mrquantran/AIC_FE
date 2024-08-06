@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "preact/compat";
-import { Button, Layout, Space, theme } from "antd";
+import { Button, Layout, Modal, Space, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import {
   SettingOutlined,
   BulbOutlined,
   ClearOutlined,
+  HistoryOutlined,
   ScanOutlined,
 } from "@ant-design/icons";
 import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
@@ -147,6 +148,19 @@ const MainLayout: React.FC = () => {
     dispatch(trySearchQuery());
   };
 
+  const showModalHistory = () => {
+    Modal.info({
+      title: "This is showing history query",
+      content: (
+        <div>
+          <p>some messages...some messages...</p>
+          <p>some messages...some messages...</p>
+        </div>
+      ),
+      onOk() {},
+    });
+  };
+
   return (
     <StyledLayout>
       {isPending ? <Loading /> : null}
@@ -163,6 +177,14 @@ const MainLayout: React.FC = () => {
             icon={<BulbOutlined />}
           >
             Try it
+          </Button>
+          <Button
+            type="default"
+            style={{ marginRight: "1rem" }}
+            icon={<HistoryOutlined />}
+            onClick={showModalHistory}
+          >
+            History
           </Button>
           <Button
             type="dashed"

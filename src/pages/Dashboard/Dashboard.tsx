@@ -1,6 +1,6 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
-import { Card, Radio, Tag } from "antd";
+import { Card, Radio, Select, Tag } from "antd";
 import { useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
@@ -9,6 +9,7 @@ import { TAppRootReducer } from "@/store";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const [mode, setMode] = useState<"image" | "table">("image");
+  const [selectTop, setSelectTop] = useState<number>(5);
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
@@ -17,14 +18,38 @@ export const Dashboard: React.FC = (): JSX.Element => {
     setMode(e.target.value);
   };
 
+  const handleChangeSelectTop = (value: {
+    value: number;
+    label: React.ReactNode;
+  }) => {
+    setSelectTop(value);
+  };
+
   return (
     <>
       {/* @ts-ignore */}
-      <Card style={{ marginBottom: "2rem " }} title="Top 5 confident image">
+      <Card
+        style={{ marginBottom: "2rem " }}
+        title={`Top ${selectTop.toString()} confident image`}
+        extra={
+          <Select
+            value={selectTop}
+            size="middle"
+            onChange={handleChangeSelectTop}
+            options={[
+              { value: 5, label: "5" },
+              { value: 10, label: "10" },
+              { value: 15, label: "15" },
+            ]}
+          />
+        }
+      >
         <ImageGallery
+          top={selectTop}
           images={searchResult?.data}
           showConfidence={true}
           total={searchResult?.total}
+          showMore={false}
         />
       </Card>
       {/* @ts-ignore */}

@@ -6,6 +6,8 @@ type IImageGalleryProps = {
   total: number;
   images: IImage[];
   showConfidence?: boolean;
+  showMore?: boolean;
+  top?: number;
 };
 
 type IImage = {
@@ -16,13 +18,15 @@ type IImage = {
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
   total,
+  top = 5,
   showConfidence = false,
+  showMore = true,
 }) => {
   const image_path = appConfig.VITE_IMAGE_URL;
 
   const image_sorted = (images: IImage[]) => {
     if (showConfidence) {
-      return images.sort((a, b) => b.confidence - a.confidence).slice(0, 5);
+      return images.sort((a, b) => b.confidence - a.confidence).slice(0, top);
     }
 
     return images;
@@ -47,9 +51,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
           </Col>
         ))}
       </Row>
-      <Row justify="center" style={{ marginTop: 16 }}>
+      {showMore ? <Row justify="center" style={{ marginTop: 16 }}>
         <Button>Show More</Button>
-      </Row>
+      </Row> : null}
     </>
   );
 };
