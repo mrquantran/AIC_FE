@@ -6,6 +6,7 @@ import {
   FileImageOutlined,
   FileTextOutlined,
   AudioOutlined,
+  CodeSandboxOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
 import TextQuery from "@/container/TextQuery/TextQuery";
@@ -13,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import Toast from "../Toast";
 import { setRemoveQuery } from "@/store/actions";
+import ObjectSelectQuery from "@/container/ObjectSelectQuery/ObjectSelectQuery";
 
 // Type definitions
 interface Tab {
@@ -97,6 +99,12 @@ const BuidlingBar: Preact.FunctionComponent = () => {
         tab: "Text",
         content: <TextQuery tabKey={key} />,
         icon: <FileTextOutlined style={styleIcon} />,
+      },
+      {
+        key: `tabObject${key}`,
+        tab: "Object",
+        content: <ObjectSelectQuery tabKey={key} />,
+        icon: <CodeSandboxOutlined style={styleIcon} />,
       },
       {
         key: `tabImage${key}`,

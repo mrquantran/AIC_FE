@@ -5,7 +5,7 @@ import { Row, Col, Space, Radio, InputNumber, InputNumberProps } from "antd";
 import Preact, { useCallback } from "preact/compat";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
-import { debounce, throttle } from "lodash";
+import { debounce } from "lodash";
 
 const StyledSpace = styled(Space)`
   width: 100%;

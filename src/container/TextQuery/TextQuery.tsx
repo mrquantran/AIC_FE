@@ -1,4 +1,4 @@
-import { Input, Space } from "antd";
+import { Input, Space, Switch } from "antd";
 import Preact, { useEffect, useCallback, useState } from "preact/compat";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchTerm } from "@/store/actions";
@@ -18,14 +18,14 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   );
   
   // Local state to manage the input value
-  const [inputValue, setInputValue] = useState(searchTab?.value || '');
+  const [inputValue, setInputValue] = useState(searchTab?.value ?? '');
 
   useEffect(() => {
     dispatch(setSearchTerm("Text", "", tabKey));
   }, [dispatch, tabKey]);
 
   useEffect(() => {
-    setInputValue(searchTab?.value || '');
+    setInputValue(searchTab?.value ?? '');
    }, [searchTab?.value]);
 
   const debouncedSetSearchTerm = useCallback(
@@ -48,8 +48,9 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
+      <Switch checkedChildren="OCR" unCheckedChildren="OCR"  defaultChecked={false}/>
       <TextArea
-        rows={5}
+        rows={3}
         key={tabKey}
         style={{ width: "100%" }}
         onChange={handleSearchTermChange}
