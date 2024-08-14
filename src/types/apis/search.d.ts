@@ -1,6 +1,6 @@
 export type TSearchKeyframePayload = {
   model: TModel;
-  value: string;
+  value: string | string[];
 };
 
 export type TSearchParams = {

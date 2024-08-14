@@ -105,6 +105,19 @@ export default (
             searchArray.filter((item) => item.tabKey !== action.payload),
         },
       });
+    case getType(actions.setRemoveQueryValue):
+      return update(state, {
+        search: {
+          $apply: (searchArray: TSearch[]) =>
+            searchArray.map((item) => {
+              if (item.tabKey === action.payload) {
+                return { ...item, value: "" };
+              } else {
+                return item;
+              }
+            }),
+        },
+      });
     default:
       return state;
   }

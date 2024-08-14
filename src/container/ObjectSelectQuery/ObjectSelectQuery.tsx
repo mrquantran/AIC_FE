@@ -19,7 +19,6 @@ const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
     setSelected(value);
     dispatch(setSearchTerm("Object", value, 1));
     console.log(value);
-    
   };
 
   return (

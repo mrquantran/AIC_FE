@@ -1,14 +1,5 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
-import {
-  Button,
-  Card,
-  Layout,
-  Modal,
-  Row,
-  Space,
-  Tabs,
-  Tag,
-} from "antd";
+import { Button, Card, Layout, Modal, Row, Space, Tabs, Tag } from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -22,7 +13,7 @@ import TextQuery from "@/container/TextQuery/TextQuery";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import Toast from "../Toast";
-import { setObjectNames, setRemoveQuery } from "@/store/actions";
+import { setObjectNames, setRemoveQuery, setRemoveQueryValue } from "@/store/actions";
 import ObjectSelectQuery from "@/container/ObjectSelectQuery/ObjectSelectQuery";
 import { useGetObjectNames } from "@/api/hooks/objects";
 
@@ -121,7 +112,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       {
         key: `tabObject${key}`,
         tab: "Object",
-        content: <ObjectSelectQuery tabKey={key}/>,
+        content: <ObjectSelectQuery tabKey={key} />,
         icon: <CodeSandboxOutlined style={styleIcon} />,
       },
       {
@@ -181,6 +172,11 @@ const BuidlingBar: Preact.FunctionComponent = () => {
     setItems((prevItems) => [...prevItems, newItem]);
   };
 
+  const handleChangeTab = (activeKey: string) => {
+    const tabKey = activeKey[activeKey.length - 1];
+    dispatch(setRemoveQueryValue(Number(tabKey)));
+  };
+
   return (
     <Layout.Sider theme="light" width="25%">
       <RowHeaderStyled direction="horizontal">
@@ -192,6 +188,8 @@ const BuidlingBar: Preact.FunctionComponent = () => {
           {items.map((item) => (
             <StyledCard key={item.key}>
               <Tabs
+                onChange={handleChangeTab}
+                type="line"
                 tabBarExtraContent={{
                   right: (
                     <DeleteOutlined

@@ -27,6 +27,11 @@ export const setRemoveQuery = createAction(
   (index: number) => index
 )();
 
+export const setRemoveQueryValue = createAction(
+  "@search/SET_REMOVE_QUERY_VALUE",
+  (tabKey: number) => tabKey
+)();
+
 export const setAddObjectQuery = createAction(
   "@search/SET_ADD_OBJECT_QUERY",
   (tabKey: number) => tabKey

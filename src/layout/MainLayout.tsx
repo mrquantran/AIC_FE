@@ -126,7 +126,7 @@ const MainLayout: React.FC = () => {
   }, [isSuccess]);
 
   const handleSearch = () => {
-    const isAllEmpty = searchItems.every((item) => item.value !== "");
+    const isAllEmpty = searchItems.every((item) => item.value !== "" || item.value.length !== 0);
     if (!isAllEmpty) {
       Toast(`Please fill the input`, "error");
       return;
