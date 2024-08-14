@@ -1,5 +1,14 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
-import { Button, Card, Layout, Modal, Row, Space, Tabs, Tag } from "antd";
+import {
+  Button,
+  Card,
+  Layout,
+  Modal,
+  Row,
+  Space,
+  Tabs,
+  Tag,
+} from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -13,8 +22,9 @@ import TextQuery from "@/container/TextQuery/TextQuery";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import Toast from "../Toast";
-import { setRemoveQuery } from "@/store/actions";
+import { setObjectNames, setRemoveQuery } from "@/store/actions";
 import ObjectSelectQuery from "@/container/ObjectSelectQuery/ObjectSelectQuery";
+import { useGetObjectNames } from "@/api/hooks/objects";
 
 // Type definitions
 interface Tab {
@@ -92,6 +102,14 @@ const BuidlingBar: Preact.FunctionComponent = () => {
     });
   };
 
+  const { data, isSuccess } = useGetObjectNames();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setObjectNames(data.data));
+    }
+  }, [isSuccess]);
+
   const renderDefaultTab = (key: number): Tab[] => {
     return [
       {
@@ -103,7 +121,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       {
         key: `tabObject${key}`,
         tab: "Object",
-        content: <ObjectSelectQuery tabKey={key} />,
+        content: <ObjectSelectQuery tabKey={key}/>,
         icon: <CodeSandboxOutlined style={styleIcon} />,
       },
       {

@@ -8,6 +8,7 @@ export type TAppState = {
     vectorSearch: "faiss" | "usearch";
     maxQuery: number;
   };
+  objectNames: string[];
 };
 
 const initialAppState: TAppState = {
@@ -16,6 +17,7 @@ const initialAppState: TAppState = {
     vectorSearch: "faiss",
     maxQuery: 5,
   },
+  objectNames: [],
 };
 
 export type TAppActionType = ActionType<typeof actions>;
@@ -34,6 +36,10 @@ export default (
         settings: {
           [action.payload.field]: { $set: action.payload.value },
         },
+      });
+    case getType(actions.setObjectNames):
+      return update(state, {
+        objectNames: { $set: action.payload },
       });
     default:
       return state;

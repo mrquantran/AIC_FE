@@ -1,36 +1,33 @@
-import { Select, SelectProps, Typography } from "antd";
+import { TAppRootReducer } from "@/store";
+import { Select, Typography } from "antd";
+import { useState } from "preact/hooks";
+import { useSelector } from "react-redux";
 
 interface IObjectQuery {
   tabKey: number;
 }
 
-const options: SelectProps["options"] = [];
+const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
+  const [selected, setSelected] = useState<string[]>([]);
+  const objectNames = useSelector(
+    (state: TAppRootReducer) => state.appState.objectNames
+  );
 
-for (let i = 0; i < 100000; i++) {
-  const value = `${i.toString(36)}${i}`;
-  options.push({
-    label: value,
-    value,
-    disabled: i === 10,
-  });
-}
-
-const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = () => {
   const handleChange = (value: string[]) => {
-    console.log(`selected ${value}`);
+    setSelected(value);
   };
 
   return (
     <>
       <Typography.Title level={5} style={{ marginBottom: "0.25rem" }}>
-        {options.length} Items
+        {selected.length} / {objectNames?.length} Items
       </Typography.Title>
       <Select
         mode="multiple"
         style={{ width: "100%" }}
         placeholder="Please select"
         onChange={handleChange}
-        options={options}
+        options={objectNames.map((name) => ({ label: name, value: name }))}
       />
     </>
   );

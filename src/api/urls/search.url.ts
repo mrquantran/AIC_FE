@@ -7,4 +7,8 @@ export const REST_API_QUERY = {
     uri: "/api/v1/query/search",
     method: "POST",
   },
+  GET_OBJECTS_NAME: {
+    uri: "/api/v1/query/object/names",
+    method: "GET",
+  },
 };
