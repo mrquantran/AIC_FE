@@ -8,7 +8,7 @@ interface IObjectQuery {
   tabKey: number;
 }
 
-const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
+const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({tabKey}) => {
   const dispatch = useDispatch();
   const [selected, setSelected] = useState<string[]>([]);
   const objectNames = useSelector(
@@ -17,8 +17,7 @@ const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
 
   const handleChange = (value: string[]) => {
     setSelected(value);
-    dispatch(setSearchTerm("Object", value, 1));
-    console.log(value);
+    dispatch(setSearchTerm("Object", value, tabKey));
   };
 
   return (
