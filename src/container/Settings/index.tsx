@@ -39,6 +39,10 @@ const SettingSearch: Preact.FunctionComponent = () => {
     debounceOnChangeInput("maxQuery", value);
   };
 
+  const onChangeKQuery: InputNumberProps["onChange"] = (value: number) => {
+    debounceOnChangeInput("kQuery", value);
+  };
+
   return (
     <>
       <Space direction="vertical" size="small" style={{ width: "100%" }}>
@@ -61,6 +65,23 @@ const SettingSearch: Preact.FunctionComponent = () => {
           </Col>
         </Row>
       </Space>
+      <StyledSpace direction="vertical" size="small" style={{ width: "100%" }}>
+        <Row>
+          <Col span={24}>
+            <h3>Setting k query in vector search</h3>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <InputNumber
+              min={1}
+              max={50}
+              defaultValue={settings.kQuery}
+              onChange={onChangeKQuery}
+            />
+          </Col>
+        </Row>
+      </StyledSpace>
       <StyledSpace direction="vertical" size="small" style={{ width: "100%" }}>
         <Row>
           <Col span={24}>

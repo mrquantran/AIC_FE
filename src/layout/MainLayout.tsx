@@ -115,6 +115,7 @@ const MainLayout: React.FC = () => {
 
   const { mutate, data, isSuccess, isPending } = useSearchKeyframes({
     vector_search: settings.vectorSearch,
+    k_query: settings.kQuery,
   });
 
   useEffect(() => {

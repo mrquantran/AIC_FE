@@ -7,6 +7,7 @@ export type TAppState = {
   settings: {
     vectorSearch: "faiss" | "usearch";
     maxQuery: number;
+    kQuery: number;
   };
   objectNames: string[];
 };
@@ -16,6 +17,7 @@ const initialAppState: TAppState = {
   settings: {
     vectorSearch: "faiss",
     maxQuery: 5,
+    kQuery: 5,
   },
   objectNames: [],
 };
