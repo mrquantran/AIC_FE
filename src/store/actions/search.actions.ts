@@ -4,7 +4,7 @@ import { TModelSearch } from "@/types/apis/search";
 
 export const setSearchTerm = createAction(
   "@search/SET_SEARCH_TERM",
-  (model: TModelSearch, value: string, tabKey: number) => ({
+  (model: TModelSearch, value: string | string[], tabKey: number) => ({
     model,
     value,
     tabKey,
@@ -27,7 +27,7 @@ export const setRemoveQuery = createAction(
   (index: number) => index
 )();
 
-export const setAddQuery = createAction(
-  "@search/SET_ADD_QUERY",
+export const setAddObjectQuery = createAction(
+  "@search/SET_ADD_OBJECT_QUERY",
   (tabKey: number) => tabKey
 )();

@@ -7,4 +7,4 @@ export type TSearchParams = {
   vector_search: "faiss" | "usearch";
 };
 
-export type TModelSearch = "Text" | "Image" | "Audio";
+export type TModelSearch = "Text" | "Image" | "Audio" | "Object"

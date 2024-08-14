@@ -42,18 +42,23 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
         {image_sorted(images)?.map((image) => (
           <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
             {/* @ts-ignore */}
-            <Image width={200} src={image_path + image.value + '.webp'} />
+            <Image width={200} src={image_path + image.value + ".webp"} />
             {showConfidence && (
               <p>
-                Confident: <strong>{image.confidence.toFixed(4)}</strong>
+                Confident:{" "}
+                <strong>
+                  {image?.confidence ? image?.confidence.toFixed(4) : "None"}
+                </strong>
               </p>
             )}
           </Col>
         ))}
       </Row>
-      {showMore ? <Row justify="center" style={{ marginTop: 16 }}>
-        <Button>Show More</Button>
-      </Row> : null}
+      {showMore ? (
+        <Row justify="center" style={{ marginTop: 16 }}>
+          <Button>Show More</Button>
+        </Row>
+      ) : null}
     </>
   );
 };

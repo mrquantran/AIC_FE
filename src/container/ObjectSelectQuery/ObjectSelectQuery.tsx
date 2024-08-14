@@ -1,13 +1,15 @@
 import { TAppRootReducer } from "@/store";
+import { setSearchTerm } from "@/store/actions";
 import { Select, Typography } from "antd";
 import { useState } from "preact/hooks";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 interface IObjectQuery {
   tabKey: number;
 }
 
 const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
+  const dispatch = useDispatch();
   const [selected, setSelected] = useState<string[]>([]);
   const objectNames = useSelector(
     (state: TAppRootReducer) => state.appState.objectNames
@@ -15,6 +17,9 @@ const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({}) => {
 
   const handleChange = (value: string[]) => {
     setSelected(value);
+    dispatch(setSearchTerm("Object", value, 1));
+    console.log(value);
+    
   };
 
   return (

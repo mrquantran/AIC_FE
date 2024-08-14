@@ -7,7 +7,7 @@ import { TModelSearch } from "@/types/apis/search";
 export type TSearch = {
   tabKey: number;
   model: TModelSearch;
-  value: string;
+  value: string | string[];
 };
 
 export type TSearchState = {
@@ -63,7 +63,7 @@ export default (
             $push: [
               {
                 tabKey: action.payload.tabKey,
-                model: "Text",
+                model: action.payload.model,
                 value: action.payload.value,
               },
             ],
@@ -74,6 +74,7 @@ export default (
         return update(state, {
           search: {
             [index]: {
+              model: { $set: action.payload.model },
               value: { $set: action.payload.value },
             },
           },
@@ -102,18 +103,6 @@ export default (
         search: {
           $apply: (searchArray: TSearch[]) =>
             searchArray.filter((item) => item.tabKey !== action.payload),
-        },
-      });
-    case getType(actions.setAddQuery):
-      return update(state, {
-        search: {
-          $push: [
-            {
-              tabKey: action.payload,
-              model: "Text",
-              value: "",
-            },
-          ],
         },
       });
     default:
