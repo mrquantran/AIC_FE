@@ -8,4 +8,4 @@ export type TSearchParams = {
   k_query: number;
 };
 
-export type TModelSearch = "Text" | "Image" | "Audio" | "Object"
+export type TModelSearch = "Text" | "Object" | "OCR";

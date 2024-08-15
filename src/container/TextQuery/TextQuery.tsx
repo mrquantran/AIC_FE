@@ -19,10 +19,16 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   
   // Local state to manage the input value
   const [inputValue, setInputValue] = useState(searchTab?.value ?? '');
+  const [ocr, setOcr] = useState(false);
 
   useEffect(() => {
-    dispatch(setSearchTerm("Text", "", tabKey));
-  }, [dispatch, tabKey]);
+    if(ocr === true) {
+      dispatch(setSearchTerm("OCR", inputValue, tabKey));
+    }
+    else {
+      dispatch(setSearchTerm("Text", inputValue, tabKey));
+    }
+  }, [dispatch, tabKey, ocr]);
 
   useEffect(() => {
     setInputValue(searchTab?.value ?? '');
@@ -30,7 +36,12 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
-      dispatch(setSearchTerm("Text", value, tabKey));
+      if (ocr === true) {
+        dispatch(setSearchTerm("OCR", value, tabKey));
+      }
+      else {
+        dispatch(setSearchTerm("Text", value, tabKey));
+      }
     }, 300), // 300ms debounce delay
     [dispatch, tabKey]
   );
@@ -40,15 +51,26 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
     debouncedSetSearchTerm(e.target.value);
   };
 
+  const handleSwitchChange = (checked: boolean) => {
+    setOcr(checked);
+  }
+
   useEffect(() => {
     return () => {
       debouncedSetSearchTerm.cancel();
     };
   }, [debouncedSetSearchTerm]);
+  
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      <Switch checkedChildren="OCR" unCheckedChildren="OCR"  defaultChecked={false}/>
+      <Switch
+        onChange={handleSwitchChange}
+        checkedChildren="OCR"
+        value={ocr}
+        unCheckedChildren="OCR"
+        defaultChecked={false}
+      />
       <TextArea
         rows={3}
         key={tabKey}
