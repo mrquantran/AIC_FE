@@ -36,13 +36,27 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     return <Empty />;
   }
 
+  const formatImagePath = (image: string) => {
+    const imageSplitted = image.split("/")
+    let group = imageSplitted[0];
+    let video = imageSplitted[1];
+    let frame = imageSplitted[2];
+
+    group = group.toString().padStart(2, '0');
+    video = video.toString().padStart(3, '0');
+    frame = frame.toString().padStart(8, '0');
+
+
+    return image_path +`L${group}/V${video}/${frame}.webp`;
+  };
+
   return (
     <>
       <Row gutter={[16, 16]}>
         {image_sorted(images)?.map((image) => (
           <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
             {/* @ts-ignore */}
-            <Image width={200} src={image_path + image.value + ".webp"} />
+            <Image width={200} src={formatImagePath(image.value)} />
             {showConfidence && (
               <p>
                 Confident:{" "}
