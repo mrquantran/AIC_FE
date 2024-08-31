@@ -1,0 +1,18 @@
+.image-wrapper {
+    cursor: pointer;
+    padding: 5px;
+    border: 2px solid transparent;
+    transition: border 0.3s ease;
+    border-radius: 8px;
+    border-style: dashed;
+}
+
+.image-wrapper.selected {
+    border-color: #e4e4e4;
+}
+
+.image {
+    width: 100%;
+    height: auto;
+    display: block;
+}

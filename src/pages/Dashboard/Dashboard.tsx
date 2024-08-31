@@ -1,15 +1,39 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
-import { Card, Radio, Select, Tag } from "antd";
+import { Card, Flex, Radio, Select, Tag } from "antd";
 import { useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 
+const groupFormatOptions = [
+  {
+    value: "all",
+    label: "Group All",
+  },
+  {
+    value: "video",
+    label: "Group by Video",
+  },
+];
+
+const groupSortOptions = [
+  {
+    value: "keyframe",
+    label: "Sort by Keyframe Index",
+  },
+  {
+    value: "score",
+    label: "Sort by Score",
+  },
+];
+
 export const Dashboard: React.FC = (): JSX.Element => {
   const [mode, setMode] = useState<"image" | "table">("image");
   const [selectTop, setSelectTop] = useState<number>(5);
+  const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
+  const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
@@ -48,9 +72,27 @@ export const Dashboard: React.FC = (): JSX.Element => {
           top={selectTop}
           images={searchResult?.data}
           showConfidence={true}
-          total={searchResult?.total}
-          showMore={false}
+          group={"all"}
         />
+      </Card>
+      {/* @ts-ignore */}
+      <Card style={{ marginBottom: "2rem " }}>
+        <Flex gap="middle" horizontal>
+          <Select
+            defaultValue="video"
+            style={{ width: 200 }}
+            onChange={(value: string) => setGroupFormat(value as "all" | "video")}
+            options={groupFormatOptions}
+            value={groupFromat}
+          />
+          <Select
+            defaultValue="score"
+            style={{ width: 200 }}
+            options={groupSortOptions}
+            onChange={(value: string) => setGroupSort(value as "keyframe" | "score")}
+            value={groupSort}
+          />
+        </Flex>
       </Card>
       {/* @ts-ignore */}
       <Card
@@ -68,10 +110,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
         }
       >
         {mode === "image" ? (
-          <ImageGallery
-            images={searchResult?.data}
-            total={searchResult?.total}
-          />
+          <ImageGallery group={groupFromat} images={searchResult?.data} />
         ) : (
           <Table data={searchResult?.data} />
         )}
