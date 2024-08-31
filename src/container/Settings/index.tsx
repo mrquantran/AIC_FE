@@ -43,6 +43,10 @@ const SettingSearch: Preact.FunctionComponent = () => {
     debounceOnChangeInput("kQuery", value);
   };
 
+  const onChangeDisplay: InputNumberProps["onChange"] = (value: number) => {
+    debounceOnChangeInput("display", value);
+  };
+
   return (
     <>
       <Space direction="vertical" size="small" style={{ width: "100%" }}>
@@ -75,9 +79,26 @@ const SettingSearch: Preact.FunctionComponent = () => {
           <Col span={24}>
             <InputNumber
               min={1}
-              max={50}
+              max={1000}
               defaultValue={settings.kQuery}
               onChange={onChangeKQuery}
+            />
+          </Col>
+        </Row>
+      </StyledSpace>
+      <StyledSpace direction="vertical" size="small" style={{ width: "100%" }}>
+        <Row>
+          <Col span={24}>
+            <h3>Setting display results</h3>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <InputNumber
+              min={1}
+              max={50}
+              defaultValue={settings.display}
+              onChange={onChangeDisplay}
             />
           </Col>
         </Row>

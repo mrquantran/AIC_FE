@@ -6,6 +6,7 @@ export type TSearchKeyframePayload = {
 export type TSearchParams = {
   vector_search: "faiss" | "usearch";
   k_query: number;
+  display: number
 };
 
 export type TModelSearch = "Text" | "Object" | "OCR";
