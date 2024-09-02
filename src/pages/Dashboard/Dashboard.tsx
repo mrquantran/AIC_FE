@@ -1,12 +1,25 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
-import { Card, Flex, Radio, Select, Tag, Col, Row, Statistic } from "antd";
-import { useState } from "preact/hooks";
+import {
+  Card,
+  Flex,
+  Radio,
+  Select,
+  Tag,
+  Col,
+  Row,
+  Statistic,
+  Tree,
+  Empty,
+} from "antd";
+import { useMemo, useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import { FolderOutlined, YoutubeOutlined } from "@ant-design/icons";
+import type { TreeDataNode } from "antd";
+import { mapSearchResultsToTree } from "./Dashboard.utils";
 
 const groupFormatOptions = [
   {
@@ -39,6 +52,10 @@ export const Dashboard: React.FC = (): JSX.Element => {
     (state: TAppRootReducer) => state.searchState.searchResult
   );
 
+  const onSelect = (selectedKeys: preact.Key[], info: any) => {
+    console.log("selected", selectedKeys, info);
+  };
+
   const handleModeChange = (e: any) => {
     setMode(e.target.value);
   };
@@ -47,9 +64,12 @@ export const Dashboard: React.FC = (): JSX.Element => {
     setSelectTop(value);
   };
 
-  const style: React.CSSProperties = {
-    padding: "0 1rem",
-  };
+  const treeData: TreeDataNode[] = useMemo(
+    () => mapSearchResultsToTree(searchResult),
+    [searchResult]
+  );
+
+  const noResult = searchResult && searchResult?.data.length === 0;
 
   return (
     <>
@@ -80,7 +100,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
         />
       </Card>
       {/* @ts-ignore */}
-      <Row  style={{ marginBottom: "1.5rem" }}>
+      <Row gutter={16} style={{ marginBottom: "1.5rem" }}>
         <Col span={8}>
           {/* @ts-ignore */}
           <Card bordered={false}>
@@ -92,7 +112,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
             />
           </Card>
         </Col>
-        <Col span={8} style={style}>
+        <Col span={8}>
           {/* @ts-ignore */}
           <Card bordered={false}>
             <Statistic
@@ -115,28 +135,59 @@ export const Dashboard: React.FC = (): JSX.Element => {
           </Card>
         </Col>
       </Row>
-      <Card style={{ marginBottom: "2rem " }}>
-        <Flex gap="middle" horizontal>
-          <Select
-            defaultValue="video"
-            style={{ width: 200 }}
-            onChange={(value: string) =>
-              setGroupFormat(value as "all" | "video")
-            }
-            options={groupFormatOptions}
-            value={groupFromat}
-          />
-          <Select
-            defaultValue="score"
-            style={{ width: 200 }}
-            options={groupSortOptions}
-            onChange={(value: string) =>
-              setGroupSort(value as "keyframe" | "score")
-            }
-            value={groupSort}
-          />
-        </Flex>
-      </Card>
+      <Row gutter={16}>
+        <Col span={12}>
+          {/* @ts-ignore */}
+          <Card style={{ marginBottom: "2rem " }}>
+            <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
+              Group, Sort by
+            </p>
+            <Flex gap="middle" horizontal>
+              <Select
+                defaultValue="video"
+                style={{ width: 200 }}
+                onChange={(value: string) =>
+                  setGroupFormat(value as "all" | "video")
+                }
+                options={groupFormatOptions}
+                value={groupFromat}
+              />
+              <Select
+                defaultValue="score"
+                style={{ width: 200 }}
+                options={groupSortOptions}
+                onChange={(value: string) =>
+                  setGroupSort(value as "keyframe" | "score")
+                }
+                value={groupSort}
+              />
+            </Flex>
+          </Card>
+        </Col>
+        <Col span={12}>
+          {/* @ts-ignore */}
+          <Card style={{ marginBottom: "2rem " }}>
+            <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
+              Search Summary
+            </p>
+            <Flex gap="middle" horizontal justify={noResult && "center"}>
+              {searchResult && searchResult?.data.length === 0 ? (
+                <Empty />
+              ) : (
+                <Tree
+                  multiple
+                  showLine={true}
+                  showIcon={true}
+                  defaultExpandedKeys={[]}
+                  onSelect={onSelect}
+                  treeData={treeData}
+                />
+              )}
+            </Flex>
+          </Card>
+        </Col>
+      </Row>
+
       {/* @ts-ignore */}
       <Card
         title="Key Frame Searching"

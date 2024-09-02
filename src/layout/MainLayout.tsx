@@ -254,8 +254,8 @@ const MainLayout: React.FC = () => {
         />
         <Layout>
           <BuidlingBar />
-          <StyledLayout padding={true}>
-            <Layout.Content style={{ overflow: "auto" }}>
+          <StyledLayout padding={true} style={{ overflow: "auto" }}>
+            <Layout.Content>
               <Outlet />
             </Layout.Content>
           </StyledLayout>
