@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "preact/compat";
-import { Button, Layout, Modal, Space, theme } from "antd";
+import { Button, Layout, Space, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import {
   ClearOutlined,
   HistoryOutlined,
   ScanOutlined,
+  SelectOutlined,
 } from "@ant-design/icons";
 import SettingDrawer from "@/components/SettingDrawer/SettingDrawer";
 import { AppError } from "@/components/ErrorHandler";
@@ -23,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
 import {
   clearSearchQuery,
+  setAppSettings,
   setSearchResult,
   submitSearchQuery,
   trySearchQuery,
@@ -45,7 +47,8 @@ const StyledHeader = styled(Layout.Header)<{ background: string }>`
 const StyledLayout = styled(Layout)`
   height: 100%;
 
-  padding: ${(props: { padding?: boolean }) => (props.padding ? "2rem 2rem 0" : 0)};
+  padding: ${(props: { padding?: boolean }) =>
+    props.padding ? "2rem 2rem 0" : 0};
 `;
 
 const MainLayout: React.FC = () => {
@@ -128,7 +131,6 @@ const MainLayout: React.FC = () => {
   useEffect(() => {
     if (isSuccess) {
       Toast("Search success", "success");
-      console.log("Search result", data);
       dispatch(setSearchResult(data));
     }
   }, [isSuccess]);
@@ -168,7 +170,20 @@ const MainLayout: React.FC = () => {
   };
 
   const handleClickTryButton = () => {
+    Toast("Prepare new query", "success", "top-start");
     dispatch(trySearchQuery());
+  };
+
+
+
+  const handleTemporalEnabled = () => {
+    Toast(
+      `Temporal mode ${settings.temporalSearch ? "disabled" : "enabled"}`,
+      `${settings.temporalSearch ? "info" : "warning"}`,
+      "top"
+    );
+
+    dispatch(setAppSettings("temporalSearch", !settings.temporalSearch));
   };
 
   return (
@@ -191,7 +206,15 @@ const MainLayout: React.FC = () => {
             style={{ marginRight: "1rem" }}
             icon={<BulbOutlined />}
           >
-            Try it
+            Test it
+          </Button>
+          <Button
+            onClick={handleTemporalEnabled}
+            style={{ marginRight: "1rem" }}
+            icon={<SelectOutlined />}
+            type={settings.temporalSearch ? "primary" : "default"}
+          >
+            Temporal {settings.temporalSearch ? "Enabled" : "Disabled"}
           </Button>
           <Button
             type="default"

@@ -11,6 +11,8 @@ import {
   handle_image_by_group,
   handle_image_sorted,
 } from "./ImageGallery.utils";
+import { useSelector } from "react-redux";
+import { TAppRootReducer } from "@/store";
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -24,7 +26,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-
+  const settings = useSelector(
+    (state: TAppRootReducer) => state.appState.settings
+  );
   if (images.length === 0) {
     return <Empty />;
   }
@@ -55,6 +59,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   }, [groupId, videoId]);
 
   const handleImageClick = (value: string) => {
+    if (!settings.temporalSearch) {
+      return;
+    }
+
     setSelectedImages((prevSelectedImages) => {
       const newSelectedImages = new Set(prevSelectedImages);
       if (newSelectedImages.has(value)) {

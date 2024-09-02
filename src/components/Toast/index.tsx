@@ -1,10 +1,14 @@
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
-function Toast(title: string, type: "success" | "error" | "warning" | "info") {
+function Toast(
+  title: string,
+  type: "success" | "error" | "warning" | "info",
+  position = "top"
+) {
   withReactContent(Swal).fire({
     toast: true,
-    position: "top",
+    position: position,
     icon: type,
     iconColor: "white",
     customClass: {

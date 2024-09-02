@@ -9,6 +9,7 @@ export type TAppState = {
     maxQuery: number;
     kQuery: number;
     display: number
+    temporalSearch: boolean
   };
   objectNames: string[];
 };
@@ -20,6 +21,7 @@ const initialAppState: TAppState = {
     maxQuery: 5,
     kQuery: 400,
     display: 20,
+    temporalSearch: false,
   },
   objectNames: [],
 };

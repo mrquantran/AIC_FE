@@ -1,12 +1,12 @@
 import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
-import { Card, Flex, Radio, Select, Tag } from "antd";
+import { Card, Flex, Radio, Select, Tag, Col, Row, Statistic } from "antd";
 import { useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
-import HistoryModal from "@/components/HistoryModal";
+import { FolderOutlined, YoutubeOutlined } from "@ant-design/icons";
 
 const groupFormatOptions = [
   {
@@ -47,6 +47,10 @@ export const Dashboard: React.FC = (): JSX.Element => {
     setSelectTop(value);
   };
 
+  const style: React.CSSProperties = {
+    padding: "0 1rem",
+  };
+
   return (
     <>
       {/* @ts-ignore */}
@@ -76,6 +80,41 @@ export const Dashboard: React.FC = (): JSX.Element => {
         />
       </Card>
       {/* @ts-ignore */}
+      <Row  style={{ marginBottom: "1.5rem" }}>
+        <Col span={8}>
+          {/* @ts-ignore */}
+          <Card bordered={false}>
+            <Statistic
+              title="Total Group"
+              value={112}
+              precision={0}
+              prefix={<FolderOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8} style={style}>
+          {/* @ts-ignore */}
+          <Card bordered={false}>
+            <Statistic
+              title="Total Video"
+              value={5}
+              precision={0}
+              prefix={<YoutubeOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          {/* @ts-ignore */}
+          <Card bordered={false}>
+            <Statistic
+              title="Respone time"
+              value={0.5}
+              precision={2}
+              suffix="s"
+            />
+          </Card>
+        </Col>
+      </Row>
       <Card style={{ marginBottom: "2rem " }}>
         <Flex gap="middle" horizontal>
           <Select

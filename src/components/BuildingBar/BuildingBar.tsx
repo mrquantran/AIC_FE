@@ -6,9 +6,7 @@ import {
   Layout,
   Modal,
   Row,
-  Select,
   Space,
-  Switch,
   Tabs,
   Tag,
 } from "antd";
@@ -16,7 +14,6 @@ import {
   PlusOutlined,
   DeleteOutlined,
   FileTextOutlined,
-  SearchOutlined,
   CodeSandboxOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
@@ -85,9 +82,6 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   const search = useSelector(
     (state: TAppRootReducer) => state.searchState.search
   );
-  const [selectSearchStyle, setSelectSearchStyle] = Preact.useState<
-    "all" | "temporal"
-  >("all");
 
   const styleIcon = { marginRight: "0.5rem" };
 
@@ -189,14 +183,6 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       <RowHeaderStyled direction="horizontal">
         <Flex align="center">
           <Button onClick={previewModal}>Preview</Button>
-          <Select
-            style={{ width: 150, marginLeft: "1rem" }}
-            defaultValue="all"
-            options={[
-              { value: "temporal", label: "Temporal Search" },
-              { value: "all", label: "Search All" },
-            ]}
-          />
         </Flex>
         <Tag color="blue">{items.length}</Tag>
       </RowHeaderStyled>
