@@ -20,3 +20,8 @@ export const setObjectNames = createAction(
   '@api/SET_OBJECT_NAMES',
   (objectNames: string[]) => objectNames
 )()
+
+export const setModeTab = createAction(
+  '@api/SET_MODE_TAB',
+  (modeTab: TAppState['modeTab']) => modeTab
+)()

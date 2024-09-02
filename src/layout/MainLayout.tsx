@@ -24,7 +24,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
 import {
   clearSearchQuery,
-  setAppSettings,
+  setDisabledTabs,
+  setEnabledTabs,
+  setModeTab,
   setSearchResult,
   setTemporalSearchEnabled,
   setTemporalSearchResult,
@@ -73,6 +75,10 @@ const MainLayout: React.FC = () => {
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
+  const disabledTabs = useSelector(
+    (state: TAppRootReducer) => state.searchState.disabledTabs
+  );
+
   const [open, setOpen] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
 
@@ -143,8 +149,9 @@ const MainLayout: React.FC = () => {
   useEffect(() => {
     if (isSuccess) {
       Toast("Search success", "success");
-      if (temporalSearch.length > 0) {
+      if (temporalSearchEnabled) {
         dispatch(setTemporalSearchResult(data));
+        dispatch(setModeTab("temporal"));
       } else {
         dispatch(setSearchResult(data));
       }
@@ -152,16 +159,27 @@ const MainLayout: React.FC = () => {
   }, [isSuccess]);
 
   const handleSearch = () => {
-    const isAllEmpty = searchItems.every(
+    const searchItemsFiltered = searchItems.filter(
+      (item) => disabledTabs.indexOf(item.tabKey) === -1
+    );
+
+    const isAllEmpty = searchItemsFiltered.every(
       (item) => item.value !== "" || item.value.length !== 0
     );
-    if (!isAllEmpty) {
+
+    if (!isAllEmpty || searchItemsFiltered.length === 0) {
       Toast(`Please fill the input`, "error");
       return;
     }
+
+    if (temporalSearchEnabled && temporalSearch.length === 0) {
+      Toast(`Please choose the keyframe for temporal search`, "error");
+      return;
+    }
+
     dispatch(submitSearchQuery());
 
-    const bodySearch = searchItems.map((item) => ({
+    const bodySearch = searchItemsFiltered.map((item) => ({
       model: item.model,
       value: item.value,
     }));
@@ -188,6 +206,8 @@ const MainLayout: React.FC = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(clearSearchQuery());
+        dispatch(setTemporalSearchEnabled(false));
+        dispatch(setModeTab("image"));
         Toast("Search queries cleared", "success");
       }
     });
@@ -208,6 +228,16 @@ const MainLayout: React.FC = () => {
       `${temporalSearchEnabled ? "info" : "warning"}`,
       "top"
     );
+    const allSearchItems = searchItems.map((item) => item.tabKey);
+
+    if (temporalSearchEnabled) {
+      dispatch(setEnabledTabs(allSearchItems));
+      dispatch(setModeTab("image"));
+    }
+
+    if (!temporalSearchEnabled) {
+      dispatch(setDisabledTabs(allSearchItems));
+    }
 
     dispatch(setTemporalSearchEnabled(!temporalSearchEnabled));
   };

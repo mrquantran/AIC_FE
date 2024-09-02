@@ -1,5 +1,6 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
 import {
+  Alert,
   Button,
   Card,
   Flex,
@@ -7,6 +8,7 @@ import {
   Modal,
   Row,
   Space,
+  Switch,
   Tabs,
   Tag,
 } from "antd";
@@ -22,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import Toast from "../Toast";
 import {
+  setDisabledTabs,
   setObjectNames,
   setRemoveQuery,
   setRemoveQueryValue,
@@ -40,6 +43,7 @@ interface Tab {
 interface QueryItem {
   key: number;
   tabs: Tab[];
+  temporalSearchMode?: boolean;
 }
 
 type QueryState = QueryItem[];
@@ -52,16 +56,8 @@ const StyledContent = styled(Layout.Content)`
   justify-content: space-between;
   padding: 1rem;
   width: 100%;
-  height: 95%;
+  max-height: 96%;
   overflow-y: auto;
-`;
-
-const RowHeaderStyled = styled(Row)`
-  width: 95%;
-  margin: 0 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 `;
 
 const StyledCard = styled(Card)`
@@ -81,29 +77,14 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   const search = useSelector(
     (state: TAppRootReducer) => state.searchState.search
   );
+  const disabledTabs = useSelector(
+    (state: TAppRootReducer) => state.searchState.disabledTabs
+  );
+  const temporalSearchEnabled = useSelector(
+    (state: TAppRootReducer) => state.appState.temporalSearchEnabled
+  );
 
   const styleIcon = { marginRight: "0.5rem" };
-
-  const previewModal = () => {
-    Modal.info({
-      title: "Preview Query",
-      content: (
-        <Space>
-          {items.map((item) => (
-            <div key={item.key}>
-              <h3>Query {item.key}</h3>
-              <ul>
-                {item.tabs.map((tab) => (
-                  <li key={tab.key}>content</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </Space>
-      ),
-      onOk() {},
-    });
-  };
 
   const { data, isSuccess } = useGetObjectNames();
 
@@ -150,6 +131,17 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       Toast("You must have at least one query", "error");
       return;
     }
+
+    if (
+      temporalSearchEnabled &&
+      search.filter(
+        (item) => item.tabKey === queryKey && disabledTabs.includes(item.tabKey)
+      ).length > 0
+    ) {
+      Toast("Cannot remove query because of Temporal Search", "error");
+      return;
+    }
+
     setItems((prevItems) => prevItems.filter((item) => item.key !== queryKey));
     dispatch(setRemoveQuery(queryKey));
   };
@@ -167,24 +159,62 @@ const BuidlingBar: Preact.FunctionComponent = () => {
     const newItem: QueryItem = {
       key: newKey,
       tabs: renderDefaultTab(newKey),
+      temporalSearchMode: temporalSearchEnabled,
     };
 
     setItems((prevItems) => [...prevItems, newItem]);
   };
+
+  useEffect(() => {
+    // remove all query have temporalSearchMode enable when temporalSearchEnabled is disable
+    if (!temporalSearchEnabled) {
+      setItems((prevItems) =>
+        prevItems.filter((item) => !item.temporalSearchMode)
+      );
+    }
+  }, [temporalSearchEnabled]);
 
   const handleChangeTab = (activeKey: string) => {
     const tabKey = activeKey[activeKey.length - 1];
     dispatch(setRemoveQueryValue(Number(tabKey)));
   };
 
+  const handleChangeSwitch = (tabKey: number) => {
+    // dispatch(setEnabledTabs(tabKey));
+    // dispatch(setDisabledTabs(tabKey));
+    if (temporalSearchEnabled) {
+      Toast("Cannot enable because of Temporal Search", "error");
+      return;
+    }
+
+    if (disabledTabs?.includes(tabKey)) {
+      dispatch(setDisabledTabs(disabledTabs.filter((item) => item !== tabKey)));
+    }
+
+    if (!disabledTabs?.includes(tabKey)) {
+      dispatch(setDisabledTabs([...disabledTabs, tabKey]));
+    }
+  };
+
   return (
     <Layout.Sider theme="light" width="25%">
-      <RowHeaderStyled direction="horizontal">
-        <Flex align="center">
-          <Button onClick={previewModal}>Preview</Button>
-        </Flex>
+      {/* <Flex style={{ margin: "0 1rem" }} align="center" justify="space-between">
+        <Button onClick={previewModal}>Preview</Button>
         <Tag color="blue">{items.length}</Tag>
-      </RowHeaderStyled>
+      </Flex> */}
+      <Flex
+        style={{ margin: "1rem 0.5rem 0rem" }}
+        align="center"
+        justify="center"
+      >
+        {temporalSearchEnabled && (
+          <Alert
+            message="Temporal Search enabled will be disabled previous queries"
+            showIcon
+          />
+        )}
+      </Flex>
+
       <StyledContent>
         <Row style={{ width: "100%" }}>
           {items.map((item) => (
@@ -194,14 +224,21 @@ const BuidlingBar: Preact.FunctionComponent = () => {
                 type="line"
                 tabBarExtraContent={{
                   right: (
-                    <DeleteOutlined
-                      onClick={() => handleRemoveQuery(item.key)}
-                      style={{
-                        marginLeft: "10px",
-                        cursor: "pointer",
-                        color: "red",
-                      }}
-                    />
+                    <Flex align="center">
+                      <Switch
+                        size="small"
+                        value={!disabledTabs?.includes(item.key)}
+                        onChange={() => handleChangeSwitch(item.key)}
+                      />
+                      <DeleteOutlined
+                        onClick={() => handleRemoveQuery(item.key)}
+                        style={{
+                          marginLeft: "10px",
+                          cursor: "pointer",
+                          color: "red",
+                        }}
+                      />
+                    </Flex>
                   ),
                 }}
               >
@@ -224,7 +261,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
         </Row>
         <Button
           type="dashed"
-          style={{ width: "100%" }}
+          style={{ width: "100%", height: "3rem" }}
           icon={<PlusOutlined />}
           onClick={handleAddQuery}
         >

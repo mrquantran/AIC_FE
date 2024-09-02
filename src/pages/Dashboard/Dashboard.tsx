@@ -15,11 +15,12 @@ import {
 import { useMemo, useState } from "preact/hooks";
 import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import { FolderOutlined, YoutubeOutlined } from "@ant-design/icons";
 import type { TreeDataNode } from "antd";
 import { mapSearchResultsToTree } from "./Dashboard.utils";
+import { setClearTemporalSearch, setModeTab } from "@/store/actions";
 
 const groupFormatOptions = [
   {
@@ -44,7 +45,9 @@ const groupSortOptions = [
 ];
 
 export const Dashboard: React.FC = (): JSX.Element => {
-  const [mode, setMode] = useState<"image" | "table" | "temporal">("image");
+  const modeTab = useSelector(
+    (state: TAppRootReducer) => state.appState.modeTab
+  );
   const [selectTop, setSelectTop] = useState<number>(15);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
   const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
@@ -54,9 +57,16 @@ export const Dashboard: React.FC = (): JSX.Element => {
   const temporalSearchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.temporalSearchResult
   );
+  const temporalSearchEnabled = useSelector(
+    (state: TAppRootReducer) => state.appState.temporalSearchEnabled
+  );
+  const dispatch = useDispatch();
 
   const handleModeChange = (e: any) => {
-    setMode(e.target.value);
+    dispatch(setModeTab(e.target.value));
+    if (modeTab === "temporal" && e.target.value === "image") {
+      dispatch(setClearTemporalSearch())
+    }
   };
 
   const handleChangeSelectTop = (value: number) => {
@@ -120,7 +130,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
       </Row>
       <Row gutter={16} style={{ marginBottom: "2rem " }}>
         <Col span={18}>
-          <Row style={{ width: "100%", marginBottom:"1.5rem" }}>
+          <Row style={{ width: "100%", marginBottom: "1.5rem" }}>
             {/* @ts-ignore */}
             <Card
               style={{ width: "100%" }}
@@ -142,7 +152,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
             >
               <ImageGallery
                 top={selectTop}
-                images={searchResult?.data}
+                images={temporalSearchEnabled ? temporalSearchResult?.data : searchResult?.data}
                 showConfidence={true}
                 group={"all"}
               />
@@ -206,9 +216,9 @@ export const Dashboard: React.FC = (): JSX.Element => {
         title="Key Frame Searching"
         extra={
           <StyledFlex>
-            <Radio.Group onChange={handleModeChange} value={mode}>
+            <Radio.Group onChange={handleModeChange} value={modeTab}>
               <Radio.Button value="image">Image</Radio.Button>
-              <Radio.Button value="table">Table</Radio.Button>
+              {/* <Radio.Button value="table">Table</Radio.Button> */}
               <Radio.Button value="temporal">Temporal</Radio.Button>
             </Radio.Group>
             <Tag color="magenta" style={{ marginLeft: "1rem" }}>
@@ -217,11 +227,11 @@ export const Dashboard: React.FC = (): JSX.Element => {
           </StyledFlex>
         }
       >
-        {mode === "image" && (
+        {modeTab === "image" && (
           <ImageGallery group={groupFromat} images={searchResult?.data} />
         )}
-        {mode === "table" && <Table data={searchResult?.data} />}
-        {mode === "temporal" && (
+        {/* {modeTab === "table" && <Table data={searchResult?.data} />} */}
+        {modeTab === "temporal" && (
           <ImageGallery
             group={groupFromat}
             images={temporalSearchResult?.data}

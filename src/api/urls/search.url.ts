@@ -15,4 +15,8 @@ export const REST_API_QUERY = {
     uri: "/api/v1/video/{{group_id}}/{{video_id}}",
     method: "GET",
   },
+  SEARCH_NEAREST_INDEX_FROM_KEYFRAME: {
+    uri: "/api/v1/query/index/nearest",
+    method: "GET",
+  },
 };

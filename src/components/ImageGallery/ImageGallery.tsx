@@ -4,7 +4,7 @@ import "./ImageGallery.scss"; // Import the CSS file
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
 import VideoModal from "../VideoModal";
-import { IImage, IImageGalleryProps } from "./ImageGallery.d";
+import { IImageGalleryProps } from "./ImageGallery.d";
 import {
   formatImagePath,
   handle_image_by_group,
@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import { setSelectedTemporalQuery } from "@/store/actions";
+import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -20,8 +21,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   showConfidence = false,
   group = "video",
 }) => {
+  const mode = useSelector((state: TAppRootReducer) => state.appState.modeTab);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
+
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
@@ -44,7 +47,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     [images]
   );
 
-  const image_group = useMemo(
+  const imageGroup = useMemo(
     () => (group === "video" ? handle_image_by_group(images) : []),
     [images, group]
   );
@@ -61,14 +64,14 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     }
   }, [groupId, videoId]);
 
-  const handleImageClick = (image: IImage) => {
-    const imageSplitted = image?.value.split("/");
+  const handleImageClick = (index: string, value: string) => {
+    const imageSplitted = value.split("/");
     let group = imageSplitted[0];
     let video = imageSplitted[1];
 
-    const temporalQuery = `${group}/${video}/${image.key}`;
+    const temporalQuery = `${group}/${video}/${index}`;
 
-    if (!temporalSearchEnabled) {
+    if (!temporalSearchEnabled || mode === "temporal") {
       return;
     }
     dispatch(setSelectedTemporalQuery(temporalQuery));
@@ -121,6 +124,65 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     setKeyframeIndex(0);
   };
 
+  const [captureKeyframe, setCaptureKeyframe] = useState<
+    {
+      keyframe: number;
+      image: string | null;
+      videoId: string;
+      groupId: string;
+      index?: number; // Add key field to state
+    }[]
+  >([]);
+
+  const {
+    data: dataNearestIndex,
+    mutate: mutateNearestIndex,
+    isSuccess: isGetNearestIndexSuccess,
+  } = useSearchNearestIndexFromKeyframe();
+
+  useEffect(() => {
+    if (isGetNearestIndexSuccess && dataNearestIndex?.data) {
+      console.log("Nearest Index Data:", dataNearestIndex);
+      const { video_id, group_id, frame_id, index, value } =
+        dataNearestIndex?.data;
+      // Update setCaptureKeyframe with the key from nearest index data
+
+      setCaptureKeyframe((prev) => [
+        ...prev,
+        {
+          keyframe: frame_id,
+          image: value,
+          videoId: video_id.toString(),
+          groupId: group_id.toString(),
+          index: index,
+        },
+      ]);
+
+      // Optionally close modal or any other side effect
+      handleModalClose();
+    }
+  }, [isGetNearestIndexSuccess, dataNearestIndex]);
+
+  // Implement handleCaptureKeyframe
+  // Implement handleCaptureKeyframe to update imageGroup
+  const handleCaptureKeyframe = ({
+    keyframe,
+    videoId,
+    groupId,
+  }: {
+    keyframe: number;
+    image: string | null;
+    groupId: string;
+    videoId: string;
+  }) => {
+    // Trigger mutation to fetch nearest index
+    mutateNearestIndex({
+      video_id: parseInt(videoId),
+      group_id: parseInt(groupId),
+      keyframe_id: keyframe,
+    });
+  };
+
   return (
     <>
       <VideoModal
@@ -130,6 +192,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
         videoSrc={videoSrc}
         isFetching={isFetching}
         keyframeIndex={keyframeIndex}
+        video_id={videoId || ""}
+        group_id={groupId || ""}
+        handleCaptureKeyframe={handleCaptureKeyframe}
       />
       <Row gutter={[16, 16]}>
         {group === "all" &&
@@ -141,7 +206,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
             </Col>
           ))}
         {group === "video" &&
-          image_group?.map((group, groupIndex) => (
+          imageGroup?.map((group, groupIndex) => (
             <Collapse
               key={groupIndex}
               style={{ width: "100%" }}
@@ -167,20 +232,33 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                         >
                           <div
                             className={`image-wrapper ${
-                              temporalSearch.includes(formatTemporalSearch(keyframe.value, keyframe.key))
+                              temporalSearch.includes(
+                                formatTemporalSearch(
+                                  keyframe.value,
+                                  keyframe.key
+                                )
+                              )
                                 ? "selected"
                                 : ""
                             }`}
-                            onClick={() => handleImageClick(keyframe)}
+                            onClick={() =>
+                              handleImageClick(keyframe.key, keyframe.value)
+                            }
                           >
                             {/* @ts-ignore */}
                             <Image
-                              preview={false}
+                              preview={
+                                temporalSearchEnabled && mode !== "temporal"
+                                  ? false
+                                  : true
+                              }
                               src={formatImagePath(keyframe.value)}
                             />
                           </div>
                           <Flex justify="center" align="center">
                             {renderRank(keyframe.confidence)}
+                            <Divider type="vertical"></Divider>
+                            {keyframe.value.split("/").pop()}
                             <Divider type="vertical"></Divider>
                             {keyframe.key}
                             <Divider type="vertical"></Divider>
@@ -200,6 +278,71 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                           </Flex>
                         </Col>
                       ))}
+
+                      {captureKeyframe.map((keyframe, keyframeIndex) => {
+                        if (
+                          keyframe.groupId === group.group_id.toString() &&
+                          keyframe.videoId === video.video_id.toString()
+                        ) {
+                          return (
+                            <Col
+                              key={keyframeIndex}
+                              xs={24}
+                              sm={12}
+                              md={8}
+                              lg={6}
+                              xl={4}
+                            >
+                              <div
+                                className={`image-wrapper ${
+                                  temporalSearch.includes(
+                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
+                                  )
+                                    ? "selected"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleImageClick(
+                                    keyframe?.index?.toString() || "",
+                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe.keyframe}`
+                                  )
+                                }
+                              >
+                                {/* @ts-ignore */}
+                                <Image
+                                  preview={
+                                    temporalSearchEnabled && mode !== "temporal"
+                                      ? false
+                                      : true
+                                  }
+                                  src={formatImagePath(keyframe.image || "")}
+                                />
+                              </div>
+                              <Flex justify="center" align="center">
+                                {renderRank(0)}
+                                <Divider type="vertical"></Divider>
+                                {keyframe.keyframe}
+                                <Divider type="vertical"></Divider>
+                                {keyframe.index}
+                                <Divider type="vertical"></Divider>
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  // shape="circle"
+                                  onClick={() =>
+                                    handlePlayVideo(
+                                      video.video_id.toString(),
+                                      group.group_id.toString(),
+                                      keyframe.keyframe.toString()
+                                    )
+                                  }
+                                  icon={<PlayCircleOutlined />}
+                                />
+                              </Flex>
+                            </Col>
+                          );
+                        }
+                      })}
                     </Row>
                   </>
                 ))}

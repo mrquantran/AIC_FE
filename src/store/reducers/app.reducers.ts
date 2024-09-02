@@ -12,6 +12,7 @@ export type TAppState = {
   };
   temporalSearchEnabled: boolean;
   objectNames: string[];
+  modeTab: "image" | "table" | "temporal"
 };
 
 const initialAppState: TAppState = {
@@ -24,6 +25,7 @@ const initialAppState: TAppState = {
   },
   temporalSearchEnabled: false,
   objectNames: [],
+  modeTab: "image",
 };
 
 export type TAppActionType = ActionType<typeof actions>;
@@ -36,6 +38,12 @@ export default (
     case getType(actions.setTemporalSearchEnabled):
       return update(state, {
         temporalSearchEnabled: {
+          $set: action.payload
+        }
+      });
+    case getType(actions.setModeTab):
+      return update(state, {
+        modeTab: {
           $set: action.payload
         }
       });

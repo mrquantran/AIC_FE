@@ -46,3 +46,17 @@ export const setSelectedTemporalQuery = createAction(
   "@search/SET_SELECTED_TEMPORAL_QUERY",
   (value: string) => value
 )();
+
+export const setEnabledTabs = createAction(
+  "@search/SET_ENABLED_TABS",
+  (tabs: number[]) => tabs
+)();
+
+export const setDisabledTabs = createAction(
+  "@search/SET_DISABLED_TABS",
+  (tabs: number[]) => tabs
+)();
+
+export const setClearTemporalSearch = createAction(
+  "@search/SET_CLEAR_TEMPORAL_SEARCH"
+)();

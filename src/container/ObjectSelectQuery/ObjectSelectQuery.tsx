@@ -14,6 +14,9 @@ const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({tabKey}) => 
   const objectNames = useSelector(
     (state: TAppRootReducer) => state.appState.objectNames
   );
+  const disabledTabs = useSelector(
+    (state: TAppRootReducer) => state.searchState.disabledTabs
+  );
 
   const handleChange = (value: string[]) => {
     setSelected(value);
@@ -30,6 +33,7 @@ const ObjectSelectQuery: preact.FunctionComponent<IObjectQuery> = ({tabKey}) => 
         style={{ width: "100%" }}
         placeholder="Please select"
         onChange={handleChange}
+        disabled={disabledTabs.includes(tabKey)}
         options={objectNames.map((name) => ({ label: name, value: name }))}
       />
     </>

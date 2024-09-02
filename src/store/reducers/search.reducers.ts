@@ -21,6 +21,7 @@ export type TSearchState = {
   };
   temporalSearch: string[];
   search: TSearch[];
+  disabledTabs: number[];
 };
 
 const trySearchState = [
@@ -62,6 +63,7 @@ export const getInitialSearchState = () => {
       total: 0,
     },
     search: defaultSearchState,
+    disabledTabs: [],
   };
 };
 
@@ -101,11 +103,34 @@ export default (
         });
       }
     }
+    case getType(actions.setDisabledTabs):
+      const uniqueDisabledTabs = Array.from(new Set(action.payload));
+      return update(state, {
+        disabledTabs: {
+          $set: uniqueDisabledTabs,
+        },
+      });
+    case getType(actions.setEnabledTabs):
+      // payload is array number
+      const uniqueEnabledTabs = Array.from(new Set(action.payload));
+      return update(state, {
+        disabledTabs: {
+          $set: state.disabledTabs.filter(
+            (item) => !uniqueEnabledTabs.includes(item)
+          ),
+        },
+      });
     case getType(actions.setTemporalSearchResult):
       return update(state, {
         temporalSearchResult: {
           data: { $set: action.payload.data },
           total: { $set: action.payload.total },
+        },
+      });
+    case getType(actions.setClearTemporalSearch):
+      return update(state, {
+        temporalSearch: {
+          $set: [],
         },
       });
     case getType(actions.setSelectedTemporalQuery):

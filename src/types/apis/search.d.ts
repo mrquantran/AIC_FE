@@ -9,4 +9,10 @@ export type TSearchParams = {
   display: number
 };
 
+export type TSearchNearestIndexFromKeyframePayload = {
+  group_id: number;
+  video_id: number;
+  keyframe_id: number;
+};
+
 export type TModelSearch = "Text" | "Object" | "OCR" | "Temporal"

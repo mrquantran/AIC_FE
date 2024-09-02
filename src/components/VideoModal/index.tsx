@@ -13,6 +13,14 @@ interface IVideoModalProps {
   isFetching: boolean;
   keyframeIndex: number;
   videoTitle: string;
+  video_id: string;
+  group_id: string;
+  handleCaptureKeyframe: (data: {
+    keyframe: number;
+    image: string | null;
+    videoId: string;
+    groupId: string;
+  }) => void;
 }
 
 const VideoModal = ({
@@ -21,6 +29,9 @@ const VideoModal = ({
   videoSrc,
   isFetching,
   videoTitle,
+  handleCaptureKeyframe,
+  video_id,
+  group_id,
   keyframeIndex = 0,
 }: IVideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -28,6 +39,19 @@ const VideoModal = ({
   const [playStatus, setPlayStatus] = useState("paused");
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
+
+  const captureImageFromVideo = (video: HTMLVideoElement) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+
+    return canvas.toDataURL("image/png");
+  };
 
   useEffect(() => {
     if (videoRef.current) {
@@ -168,7 +192,7 @@ const VideoModal = ({
         >
           <Space.Compact block>
             <Tooltip title="Play Status" placement="bottom">
-              <Input style={{ width: "12%" }} value={playStatus} readOnly />
+              <Input style={{ width: "15%" }} value={playStatus} readOnly />
             </Tooltip>
             <Button
               onClick={handlePreviousKeyframe}
@@ -176,7 +200,7 @@ const VideoModal = ({
             />
             <Tooltip title="Keyframe Index" placement="bottom">
               <Input
-                style={{ width: "10%" }}
+                style={{ width: "12%" }}
                 value={currentKeyframe}
                 onChange={handleKeyframeChange}
               />
@@ -188,17 +212,34 @@ const VideoModal = ({
 
             <Tooltip title="Current Time (s)" placement="bottom">
               <Input
-                style={{ width: "14%" }}
+                style={{ width: "16%" }}
                 prefix={<ClockCircleOutlined />}
-                value={currentSecond.toFixed(2)} // Display time in seconds, formatted to 2 decimal places
+                // Display time in format mintues:seconds, formatted to 2 decimal places
+                value={currentSecond.toFixed(1)}
                 readOnly
               />
             </Tooltip>
+          </Space.Compact>
+          <Flex gap={8} align="center">
             <Button type="dashed" onClick={handleBackToKeyframe}>
               Back to Start
             </Button>
-          </Space.Compact>
-          <Button type="primary">Save History</Button>
+            <Button
+              onClick={() =>
+                handleCaptureKeyframe({
+                  keyframe: currentKeyframe,
+                  image: videoRef.current
+                    ? captureImageFromVideo(videoRef.current)
+                    : null,
+                  videoId: video_id,
+                  groupId: group_id,
+                })
+              }
+            >
+              Capture Keyframe
+            </Button>
+            <Button type="primary">Save History</Button>
+          </Flex>
         </Flex>
       </Flex>
     </Modal>

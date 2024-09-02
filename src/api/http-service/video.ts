@@ -6,8 +6,8 @@ export const getVideoByGroupVideoId = async (
   groupId: string
 ): Promise<any> => {
   const url = REST_API.GET_VIDEO.uri
-    .replace("{{group_id}}", groupId)
-    .replace("{{video_id}}", videoId);
+    .replace("{{group_id}}", groupId.toString())
+    .replace("{{video_id}}", videoId.toString());
 
   return await HttpService.fetch<any, Blob>({
     apiConfig: {

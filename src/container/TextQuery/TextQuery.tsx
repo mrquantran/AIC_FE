@@ -16,6 +16,9 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   const searchTab = useSelector((state: TAppRootReducer) =>
     state?.searchState?.search.find((s) => s.tabKey === tabKey)
   );
+  const disableTab = useSelector((state: TAppRootReducer) =>
+    state?.searchState?.disabledTabs?.includes(tabKey)
+  );
 
   // Local state to manage the input value
   const [inputValue, setInputValue] = useState(searchTab?.value ?? "");
@@ -61,13 +64,14 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      <Switch
+      {/* <Switch
         onChange={handleSwitchChange}
         checkedChildren="OCR"
         value={ocr}
+        size="small"
         unCheckedChildren="OCR"
         defaultChecked={false}
-      />
+      /> */}
       <TextArea
         rows={3}
         key={tabKey}
@@ -76,6 +80,7 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
         placeholder="input search text"
         allowClear
         value={inputValue}
+        disabled={disableTab}
       />
     </Space>
   );
