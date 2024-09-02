@@ -11,4 +11,8 @@ export const REST_API_QUERY = {
     uri: "/api/v1/query/object/names",
     method: "GET",
   },
+  GET_VIDEO: {
+    uri: "/api/v1/video/{{group_id}}/{{video_id}}",
+    method: "GET",
+  },
 };

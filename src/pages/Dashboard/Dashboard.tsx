@@ -6,6 +6,7 @@ import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
+import HistoryModal from "@/components/HistoryModal";
 
 const groupFormatOptions = [
   {
@@ -42,10 +43,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
     setMode(e.target.value);
   };
 
-  const handleChangeSelectTop = (value: {
-    value: number;
-    label: React.ReactNode;
-  }) => {
+  const handleChangeSelectTop = (value: number) => {
     setSelectTop(value);
   };
 
@@ -54,7 +52,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
       {/* @ts-ignore */}
       <Card
         style={{ marginBottom: "2rem " }}
-        title={`Top ${selectTop.toString()} confident image`}
+        title={`Top ${selectTop.toString()} rank image`}
         extra={
           <Select
             value={selectTop}
@@ -64,6 +62,8 @@ export const Dashboard: React.FC = (): JSX.Element => {
               { value: 5, label: "5" },
               { value: 10, label: "10" },
               { value: 15, label: "15" },
+              { value: 30, label: "30" },
+              { value: 50, label: "50" },
             ]}
           />
         }
@@ -81,7 +81,9 @@ export const Dashboard: React.FC = (): JSX.Element => {
           <Select
             defaultValue="video"
             style={{ width: 200 }}
-            onChange={(value: string) => setGroupFormat(value as "all" | "video")}
+            onChange={(value: string) =>
+              setGroupFormat(value as "all" | "video")
+            }
             options={groupFormatOptions}
             value={groupFromat}
           />
@@ -89,7 +91,9 @@ export const Dashboard: React.FC = (): JSX.Element => {
             defaultValue="score"
             style={{ width: 200 }}
             options={groupSortOptions}
-            onChange={(value: string) => setGroupSort(value as "keyframe" | "score")}
+            onChange={(value: string) =>
+              setGroupSort(value as "keyframe" | "score")
+            }
             value={groupSort}
           />
         </Flex>

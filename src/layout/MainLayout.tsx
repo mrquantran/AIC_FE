@@ -31,6 +31,8 @@ import Toast from "@/components/Toast";
 import { TAppRootReducer } from "@/store";
 import SettingSearch from "@/container/Settings";
 import Loading from "@/components/Loading";
+import HistoryModal from "@/components/HistoryModal";
+import Swal from "sweetalert2";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -43,10 +45,12 @@ const StyledHeader = styled(Layout.Header)<{ background: string }>`
 const StyledLayout = styled(Layout)`
   height: 100%;
 
-  padding: ${(props: { padding?: boolean }) => (props.padding ? "2rem" : 0)};
+  padding: ${(props: { padding?: boolean }) => (props.padding ? "2rem 2rem 0" : 0)};
 `;
 
 const MainLayout: React.FC = () => {
+  const { authorizedRoutes } = useRoutes();
+  const location = useLocation();
   const dispatch = useDispatch();
   const searchItems = useSelector(
     (state: TAppRootReducer) => state.searchState.search
@@ -55,6 +59,11 @@ const MainLayout: React.FC = () => {
     (state: TAppRootReducer) => state.appState.settings
   );
   const [open, setOpen] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
+
+  const showModalHistory = () => {
+    setHistoryVisible(true);
+  };
 
   const showDrawer = () => {
     setOpen(true);
@@ -67,9 +76,6 @@ const MainLayout: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
-
-  const { authorizedRoutes } = useRoutes();
-  const location = useLocation();
 
   const sideBarItems = useMemo<TSideBarItem[]>(
     () =>
@@ -116,7 +122,7 @@ const MainLayout: React.FC = () => {
   const { mutate, data, isSuccess, isPending } = useSearchKeyframes({
     vector_search: settings.vectorSearch,
     k_query: settings.kQuery,
-    display: settings.display
+    display: settings.display,
   });
 
   useEffect(() => {
@@ -128,7 +134,9 @@ const MainLayout: React.FC = () => {
   }, [isSuccess]);
 
   const handleSearch = () => {
-    const isAllEmpty = searchItems.every((item) => item.value !== "" || item.value.length !== 0);
+    const isAllEmpty = searchItems.every(
+      (item) => item.value !== "" || item.value.length !== 0
+    );
     if (!isAllEmpty) {
       Toast(`Please fill the input`, "error");
       return;
@@ -143,28 +151,33 @@ const MainLayout: React.FC = () => {
   };
 
   const handleClickClearButton = () => {
-    dispatch(clearSearchQuery());
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to clear all search queries? (this action cannot be undone and remove all history)",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(clearSearchQuery());
+        Toast("Search queries cleared", "success");
+      }
+    });
   };
 
   const handleClickTryButton = () => {
     dispatch(trySearchQuery());
   };
 
-  const showModalHistory = () => {
-    Modal.info({
-      title: "This is showing history query",
-      content: (
-        <div>
-          <p>some messages...some messages...</p>
-          <p>some messages...some messages...</p>
-        </div>
-      ),
-      onOk() {},
-    });
-  };
-
   return (
     <StyledLayout>
+      <HistoryModal
+        title="History Search"
+        handleModalClose={() => setHistoryVisible(false)}
+        isModalVisible={historyVisible}
+      />
       {isPending ? <Loading /> : null}
       <StyledHeader background={colorBgContainer}>
         <StyledFlex>

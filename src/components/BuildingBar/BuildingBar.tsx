@@ -1,11 +1,22 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
-import { Button, Card, Layout, Modal, Row, Space, Tabs, Tag } from "antd";
+import {
+  Button,
+  Card,
+  Flex,
+  Layout,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Tabs,
+  Tag,
+} from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,
-  FileImageOutlined,
   FileTextOutlined,
-  AudioOutlined,
+  SearchOutlined,
   CodeSandboxOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
@@ -13,9 +24,14 @@ import TextQuery from "@/container/TextQuery/TextQuery";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import Toast from "../Toast";
-import { setObjectNames, setRemoveQuery, setRemoveQueryValue } from "@/store/actions";
+import {
+  setObjectNames,
+  setRemoveQuery,
+  setRemoveQueryValue,
+} from "@/store/actions";
 import ObjectSelectQuery from "@/container/ObjectSelectQuery/ObjectSelectQuery";
 import { useGetObjectNames } from "@/api/hooks/objects";
+import TemporalSearch from "@/container/TemporalSearch";
 
 // Type definitions
 interface Tab {
@@ -69,6 +85,9 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   const search = useSelector(
     (state: TAppRootReducer) => state.searchState.search
   );
+  const [selectSearchStyle, setSelectSearchStyle] = Preact.useState<
+    "all" | "temporal"
+  >("all");
 
   const styleIcon = { marginRight: "0.5rem" };
 
@@ -114,18 +133,6 @@ const BuidlingBar: Preact.FunctionComponent = () => {
         tab: "Object",
         content: <ObjectSelectQuery tabKey={key} />,
         icon: <CodeSandboxOutlined style={styleIcon} />,
-      },
-      {
-        key: `tabImage${key}`,
-        tab: "Image",
-        content: <p>Content for Tab 2</p>,
-        icon: <FileImageOutlined style={styleIcon} />,
-      },
-      {
-        key: `tabAudio${key}`,
-        tab: "Audio",
-        content: <p>Content for Tab 3</p>,
-        icon: <AudioOutlined style={styleIcon} />,
       },
     ];
   };
@@ -180,7 +187,17 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   return (
     <Layout.Sider theme="light" width="25%">
       <RowHeaderStyled direction="horizontal">
-        <Button onClick={previewModal}>Preview</Button>
+        <Flex align="center">
+          <Button onClick={previewModal}>Preview</Button>
+          <Select
+            style={{ width: 150, marginLeft: "1rem" }}
+            defaultValue="all"
+            options={[
+              { value: "temporal", label: "Temporal Search" },
+              { value: "all", label: "Search All" },
+            ]}
+          />
+        </Flex>
         <Tag color="blue">{items.length}</Tag>
       </RowHeaderStyled>
       <StyledContent>
