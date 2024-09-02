@@ -1,18 +1,18 @@
 import Preact, { useEffect, useMemo, useState } from "preact/compat";
 import { Col, Collapse, Divider, Empty, Row, Image, Button, Flex } from "antd";
-import { appConfig } from "@/config/appConfig";
 import "./ImageGallery.scss"; // Import the CSS file
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
 import VideoModal from "../VideoModal";
-import { IImageGalleryProps } from "./ImageGallery.d";
+import { IImage, IImageGalleryProps } from "./ImageGallery.d";
 import {
   formatImagePath,
   handle_image_by_group,
   handle_image_sorted,
 } from "./ImageGallery.utils";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
+import { setSelectedTemporalQuery } from "@/store/actions";
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -20,14 +20,17 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   showConfidence = false,
   group = "video",
 }) => {
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set()); // State to manage selected images
   const [groupId, setGroupId] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const settings = useSelector(
-    (state: TAppRootReducer) => state.appState.settings
+  const dispatch = useDispatch();
+  const temporalSearchEnabled = useSelector(
+    (state: TAppRootReducer) => state.appState.temporalSearchEnabled
+  );
+  const temporalSearch = useSelector(
+    (state: TAppRootReducer) => state.searchState.temporalSearch
   );
   if (images.length === 0) {
     return <Empty />;
@@ -58,20 +61,17 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     }
   }, [groupId, videoId]);
 
-  const handleImageClick = (value: string) => {
-    if (!settings.temporalSearch) {
+  const handleImageClick = (image: IImage) => {
+    const imageSplitted = image?.value.split("/");
+    let group = imageSplitted[0];
+    let video = imageSplitted[1];
+
+    const temporalQuery = `${group}/${video}/${image.key}`;
+
+    if (!temporalSearchEnabled) {
       return;
     }
-
-    setSelectedImages((prevSelectedImages) => {
-      const newSelectedImages = new Set(prevSelectedImages);
-      if (newSelectedImages.has(value)) {
-        newSelectedImages.delete(value); // Deselect if already selected
-      } else {
-        newSelectedImages.add(value); // Add to selected images
-      }
-      return newSelectedImages;
-    });
+    dispatch(setSelectedTemporalQuery(temporalQuery));
   };
 
   const { data, refetch, isFetching } = useVideoStream(groupId, videoId);
@@ -87,6 +87,13 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     setVideoId(videoId);
     setKeyframeIndex(keyframeIndex);
     setIsModalVisible(true);
+  };
+
+  const formatTemporalSearch = (keyframe: string, index: string) => {
+    const imageSplitted = keyframe?.split("/");
+    let group = imageSplitted[0];
+    let video = imageSplitted[1];
+    return `${group}/${video}/${index}`;
   };
 
   const renderRank = (rank: number) => {
@@ -129,7 +136,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
           image_sorted?.map((image) => (
             <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
               {/* @ts-ignore */}
-              <Image width={200} src={formatImagePath(image.value)} />
+              <Image src={formatImagePath(image.value)} />
               {showConfidence && renderRank(image.confidence)}
             </Col>
           ))}
@@ -160,11 +167,11 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                         >
                           <div
                             className={`image-wrapper ${
-                              selectedImages.has(keyframe.value)
+                              temporalSearch.includes(formatTemporalSearch(keyframe.value, keyframe.key))
                                 ? "selected"
                                 : ""
                             }`}
-                            onClick={() => handleImageClick(keyframe.value)}
+                            onClick={() => handleImageClick(keyframe)}
                           >
                             {/* @ts-ignore */}
                             <Image
@@ -175,7 +182,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                           <Flex justify="center" align="center">
                             {renderRank(keyframe.confidence)}
                             <Divider type="vertical"></Divider>
-                            {keyframe.value.split("/").pop()}
+                            {keyframe.key}
                             <Divider type="vertical"></Divider>
                             <Button
                               type="primary"

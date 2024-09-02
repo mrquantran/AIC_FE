@@ -17,6 +17,11 @@ export const clearSearchQuery = createAction("@search/CLEAR_SEARCH_QUERY")();
 
 export const trySearchQuery = createAction("@search/TRY_SEARCH_QUERY")();
 
+export const setTemporalSearchResult = createAction(
+  "@search/SET_TEMPORAL_SEARCH_RESULT",
+  (result: any) => result
+)();
+
 export const setSearchResult = createAction(
   "@search/SET_SEARCH_RESULT",
   (result: any) => result
@@ -35,4 +40,9 @@ export const setRemoveQueryValue = createAction(
 export const setAddObjectQuery = createAction(
   "@search/SET_ADD_OBJECT_QUERY",
   (tabKey: number) => tabKey
+)();
+
+export const setSelectedTemporalQuery = createAction(
+  "@search/SET_SELECTED_TEMPORAL_QUERY",
+  (value: string) => value
 )();

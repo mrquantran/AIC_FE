@@ -8,9 +8,9 @@ export type TAppState = {
     vectorSearch: "faiss" | "usearch";
     maxQuery: number;
     kQuery: number;
-    display: number
-    temporalSearch: boolean
+    display: number;
   };
+  temporalSearchEnabled: boolean;
   objectNames: string[];
 };
 
@@ -21,8 +21,8 @@ const initialAppState: TAppState = {
     maxQuery: 5,
     kQuery: 400,
     display: 20,
-    temporalSearch: false,
   },
+  temporalSearchEnabled: false,
   objectNames: [],
 };
 
@@ -33,6 +33,12 @@ export default (
   action: TAppActionType
 ): TAppState => {
   switch (action.type) {
+    case getType(actions.setTemporalSearchEnabled):
+      return update(state, {
+        temporalSearchEnabled: {
+          $set: action.payload
+        }
+      });
     case getType(actions.setAppError):
       return update(state, {
         apiError: { $set: action.payload },

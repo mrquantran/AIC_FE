@@ -16,30 +16,28 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
   const searchTab = useSelector((state: TAppRootReducer) =>
     state?.searchState?.search.find((s) => s.tabKey === tabKey)
   );
-  
+
   // Local state to manage the input value
-  const [inputValue, setInputValue] = useState(searchTab?.value ?? '');
+  const [inputValue, setInputValue] = useState(searchTab?.value ?? "");
   const [ocr, setOcr] = useState(false);
 
   useEffect(() => {
-    if(ocr === true) {
+    if (ocr === true) {
       dispatch(setSearchTerm("OCR", inputValue, tabKey));
-    }
-    else {
+    } else {
       dispatch(setSearchTerm("Text", inputValue, tabKey));
     }
   }, [dispatch, tabKey, ocr]);
 
   useEffect(() => {
-    setInputValue(searchTab?.value ?? '');
-   }, [searchTab?.value]);
+    setInputValue(searchTab?.value ?? "");
+  }, [searchTab?.value]);
 
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
       if (ocr === true) {
         dispatch(setSearchTerm("OCR", value, tabKey));
-      }
-      else {
+      } else {
         dispatch(setSearchTerm("Text", value, tabKey));
       }
     }, 300), // 300ms debounce delay
@@ -53,14 +51,13 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   const handleSwitchChange = (checked: boolean) => {
     setOcr(checked);
-  }
+  };
 
   useEffect(() => {
     return () => {
       debouncedSetSearchTerm.cancel();
     };
   }, [debouncedSetSearchTerm]);
-  
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>

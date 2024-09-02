@@ -6,6 +6,7 @@ export interface IImageGalleryProps {
 }
 
 export interface IImage {
+  key: string
   value: string;
   confidence: number;
   video_id: number;

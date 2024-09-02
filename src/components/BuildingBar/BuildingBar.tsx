@@ -28,7 +28,6 @@ import {
 } from "@/store/actions";
 import ObjectSelectQuery from "@/container/ObjectSelectQuery/ObjectSelectQuery";
 import { useGetObjectNames } from "@/api/hooks/objects";
-import TemporalSearch from "@/container/TemporalSearch";
 
 // Type definitions
 interface Tab {

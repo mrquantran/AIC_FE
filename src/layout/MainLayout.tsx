@@ -26,6 +26,8 @@ import {
   clearSearchQuery,
   setAppSettings,
   setSearchResult,
+  setTemporalSearchEnabled,
+  setTemporalSearchResult,
   submitSearchQuery,
   trySearchQuery,
 } from "@/store/actions";
@@ -35,6 +37,7 @@ import SettingSearch from "@/container/Settings";
 import Loading from "@/components/Loading";
 import HistoryModal from "@/components/HistoryModal";
 import Swal from "sweetalert2";
+import { convertToSearchBodyTemporal } from "./MainLayout.utils";
 
 const StyledHeader = styled(Layout.Header)<{ background: string }>`
   background: ${(props) => props.background};
@@ -60,6 +63,15 @@ const MainLayout: React.FC = () => {
   );
   const settings = useSelector(
     (state: TAppRootReducer) => state.appState.settings
+  );
+  const temporalSearch = useSelector(
+    (state: TAppRootReducer) => state.searchState.temporalSearch
+  );
+  const temporalSearchEnabled = useSelector(
+    (state: TAppRootReducer) => state.appState.temporalSearchEnabled
+  );
+  const searchResult = useSelector(
+    (state: TAppRootReducer) => state.searchState.searchResult
   );
   const [open, setOpen] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
@@ -131,7 +143,11 @@ const MainLayout: React.FC = () => {
   useEffect(() => {
     if (isSuccess) {
       Toast("Search success", "success");
-      dispatch(setSearchResult(data));
+      if (temporalSearch.length > 0) {
+        dispatch(setTemporalSearchResult(data));
+      } else {
+        dispatch(setSearchResult(data));
+      }
     }
   }, [isSuccess]);
 
@@ -144,12 +160,20 @@ const MainLayout: React.FC = () => {
       return;
     }
     dispatch(submitSearchQuery());
-    mutate(
-      searchItems.map((item) => ({
-        model: item.model,
-        value: item.value,
-      }))
-    );
+
+    const bodySearch = searchItems.map((item) => ({
+      model: item.model,
+      value: item.value,
+    }));
+
+    const temporalSearchValue = convertToSearchBodyTemporal(temporalSearch);
+
+    const payload =
+      temporalSearchValue.value.length > 0
+        ? bodySearch.concat(temporalSearchValue)
+        : bodySearch;
+
+    mutate(payload);
   };
 
   const handleClickClearButton = () => {
@@ -174,16 +198,18 @@ const MainLayout: React.FC = () => {
     dispatch(trySearchQuery());
   };
 
-
-
   const handleTemporalEnabled = () => {
+    if (searchResult.data.length === 0) {
+      Toast("Please search first", "error", "top");
+      return;
+    }
     Toast(
-      `Temporal mode ${settings.temporalSearch ? "disabled" : "enabled"}`,
-      `${settings.temporalSearch ? "info" : "warning"}`,
+      `Temporal mode ${temporalSearchEnabled ? "disabled" : "enabled"}`,
+      `${temporalSearchEnabled ? "info" : "warning"}`,
       "top"
     );
 
-    dispatch(setAppSettings("temporalSearch", !settings.temporalSearch));
+    dispatch(setTemporalSearchEnabled(!temporalSearchEnabled));
   };
 
   return (
@@ -212,9 +238,9 @@ const MainLayout: React.FC = () => {
             onClick={handleTemporalEnabled}
             style={{ marginRight: "1rem" }}
             icon={<SelectOutlined />}
-            type={settings.temporalSearch ? "primary" : "default"}
+            type={temporalSearchEnabled ? "primary" : "default"}
           >
-            Temporal {settings.temporalSearch ? "Enabled" : "Disabled"}
+            Temporal {temporalSearchEnabled ? "Enabled" : "Disabled"}
           </Button>
           <Button
             type="default"

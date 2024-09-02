@@ -11,6 +11,11 @@ export const setAppSettings = createAction(
   (field: keyof TAppState['settings'], value: TAppState['settings'][keyof TAppState['settings']]) => ({ field, value })
 )()
 
+export const setTemporalSearchEnabled = createAction(
+  '@api/SET_TEMPORAL_SEARCH_ENABLED',
+  (enabled: boolean) => enabled
+)()
+
 export const setObjectNames = createAction(
   '@api/SET_OBJECT_NAMES',
   (objectNames: string[]) => objectNames

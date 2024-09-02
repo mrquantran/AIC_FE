@@ -44,17 +44,16 @@ const groupSortOptions = [
 ];
 
 export const Dashboard: React.FC = (): JSX.Element => {
-  const [mode, setMode] = useState<"image" | "table">("image");
-  const [selectTop, setSelectTop] = useState<number>(5);
+  const [mode, setMode] = useState<"image" | "table" | "temporal">("image");
+  const [selectTop, setSelectTop] = useState<number>(15);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
   const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
-
-  const onSelect = (selectedKeys: preact.Key[], info: any) => {
-    console.log("selected", selectedKeys, info);
-  };
+  const temporalSearchResult = useSelector(
+    (state: TAppRootReducer) => state.searchState.temporalSearchResult
+  );
 
   const handleModeChange = (e: any) => {
     setMode(e.target.value);
@@ -71,34 +70,18 @@ export const Dashboard: React.FC = (): JSX.Element => {
 
   const noResult = searchResult && searchResult?.data.length === 0;
 
+  const getTotalGroupFromResult = (data: any) => {
+    const groupIds = data.map((item: any) => item.group_id);
+    return new Set(groupIds).size;
+  };
+
+  const getTotalVideoFromResult = (data: any) => {
+    const groupIds = data.map((item: any) => item.video_id);
+    return new Set(groupIds).size;
+  };
+
   return (
     <>
-      {/* @ts-ignore */}
-      <Card
-        style={{ marginBottom: "2rem " }}
-        title={`Top ${selectTop.toString()} rank image`}
-        extra={
-          <Select
-            value={selectTop}
-            size="middle"
-            onChange={handleChangeSelectTop}
-            options={[
-              { value: 5, label: "5" },
-              { value: 10, label: "10" },
-              { value: 15, label: "15" },
-              { value: 30, label: "30" },
-              { value: 50, label: "50" },
-            ]}
-          />
-        }
-      >
-        <ImageGallery
-          top={selectTop}
-          images={searchResult?.data}
-          showConfidence={true}
-          group={"all"}
-        />
-      </Card>
       {/* @ts-ignore */}
       <Row gutter={16} style={{ marginBottom: "1.5rem" }}>
         <Col span={8}>
@@ -106,7 +89,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
           <Card bordered={false}>
             <Statistic
               title="Total Group"
-              value={112}
+              value={getTotalGroupFromResult(searchResult?.data) || 0}
               precision={0}
               prefix={<FolderOutlined />}
             />
@@ -117,7 +100,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
           <Card bordered={false}>
             <Statistic
               title="Total Video"
-              value={5}
+              value={getTotalVideoFromResult(searchResult?.data) || 0}
               precision={0}
               prefix={<YoutubeOutlined />}
             />
@@ -135,38 +118,68 @@ export const Dashboard: React.FC = (): JSX.Element => {
           </Card>
         </Col>
       </Row>
-      <Row gutter={16}>
-        <Col span={12}>
-          {/* @ts-ignore */}
-          <Card style={{ marginBottom: "2rem " }}>
-            <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
-              Group, Sort by
-            </p>
-            <Flex gap="middle" horizontal>
-              <Select
-                defaultValue="video"
-                style={{ width: 200 }}
-                onChange={(value: string) =>
-                  setGroupFormat(value as "all" | "video")
-                }
-                options={groupFormatOptions}
-                value={groupFromat}
+      <Row gutter={16} style={{ marginBottom: "2rem " }}>
+        <Col span={18}>
+          <Row style={{ width: "100%", marginBottom:"1.5rem" }}>
+            {/* @ts-ignore */}
+            <Card
+              style={{ width: "100%" }}
+              title={`Top ${selectTop.toString()} rank image`}
+              extra={
+                <Select
+                  value={selectTop}
+                  size="middle"
+                  onChange={handleChangeSelectTop}
+                  options={[
+                    { value: 5, label: "5" },
+                    { value: 10, label: "10" },
+                    { value: 15, label: "15" },
+                    { value: 30, label: "30" },
+                    { value: 50, label: "50" },
+                  ]}
+                />
+              }
+            >
+              <ImageGallery
+                top={selectTop}
+                images={searchResult?.data}
+                showConfidence={true}
+                group={"all"}
               />
-              <Select
-                defaultValue="score"
-                style={{ width: 200 }}
-                options={groupSortOptions}
-                onChange={(value: string) =>
-                  setGroupSort(value as "keyframe" | "score")
-                }
-                value={groupSort}
-              />
-            </Flex>
-          </Card>
+            </Card>
+          </Row>
+          <Row>
+            {/* @ts-ignore */}
+            <Card style={{ width: "100%" }}>
+              <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
+                Group, Sort by
+              </p>
+              <Flex gap="middle" horizontal>
+                <Select
+                  defaultValue="video"
+                  style={{ width: 200 }}
+                  onChange={(value: string) =>
+                    setGroupFormat(value as "all" | "video")
+                  }
+                  options={groupFormatOptions}
+                  value={groupFromat}
+                />
+                <Select
+                  defaultValue="score"
+                  style={{ width: 200 }}
+                  options={groupSortOptions}
+                  onChange={(value: string) =>
+                    setGroupSort(value as "keyframe" | "score")
+                  }
+                  value={groupSort}
+                />
+              </Flex>
+            </Card>
+          </Row>
         </Col>
-        <Col span={12}>
+        <Col span={6}>
           {/* @ts-ignore */}
-          <Card style={{ marginBottom: "2rem " }}>
+          <Card style={{ marginBottom: "2rem", height: "100%" }}>
             <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
               Search Summary
             </p>
@@ -179,7 +192,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                   showLine={true}
                   showIcon={true}
                   defaultExpandedKeys={[]}
-                  onSelect={onSelect}
+                  // onSelect={onSelect}
                   treeData={treeData}
                 />
               )}
@@ -196,6 +209,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
             <Radio.Group onChange={handleModeChange} value={mode}>
               <Radio.Button value="image">Image</Radio.Button>
               <Radio.Button value="table">Table</Radio.Button>
+              <Radio.Button value="temporal">Temporal</Radio.Button>
             </Radio.Group>
             <Tag color="magenta" style={{ marginLeft: "1rem" }}>
               {searchResult.total} images
@@ -203,10 +217,15 @@ export const Dashboard: React.FC = (): JSX.Element => {
           </StyledFlex>
         }
       >
-        {mode === "image" ? (
+        {mode === "image" && (
           <ImageGallery group={groupFromat} images={searchResult?.data} />
-        ) : (
-          <Table data={searchResult?.data} />
+        )}
+        {mode === "table" && <Table data={searchResult?.data} />}
+        {mode === "temporal" && (
+          <ImageGallery
+            group={groupFromat}
+            images={temporalSearchResult?.data}
+          />
         )}
       </Card>
     </>

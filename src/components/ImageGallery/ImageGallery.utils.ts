@@ -6,10 +6,7 @@ export const handle_image_by_group = (images: IImage[]) => {
     group_id: number;
     videos: Array<{
       video_id: number;
-      keyframes: Array<{
-        confidence: number;
-        value: string;
-      }>;
+      keyframes: Array<IImage>;
     }>;
   }> = [];
 
@@ -35,9 +32,10 @@ export const handle_image_by_group = (images: IImage[]) => {
     videoMap.forEach((keyframes, video_id) => {
       videos.push({
         video_id,
-        keyframes: keyframes.map((image) => ({
+        keyframes: keyframes.map((image: IImage) => ({
           confidence: image.confidence,
           value: image.value,
+          key: image.key,
         })),
       });
     });

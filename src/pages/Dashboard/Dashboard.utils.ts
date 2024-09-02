@@ -29,6 +29,7 @@ export const mapSearchResultsToTree = (
     const groupKey = `Group ${group.group_id}-${groupIndex}`;
     return {
       key: groupKey,
+      selectable: false,
       title: `Group ${group.group_id}`,
       icon: FolderOutlined,
       children: group.videos.map((video, videoIndex) => {
@@ -37,11 +38,13 @@ export const mapSearchResultsToTree = (
           key: videoKey,
           title: `Video ${video.video_id}`,
           icon: YoutubeOutlined,
+          selectable: false,
           children: video.keyframes.map((keyframe, keyframeIndex) => {
             const keyframeKey = `Keyframe ${keyframe.value}-${keyframeIndex}`;
             return {
               key: keyframeKey,
               icon: NumberOutlined,
+              selectable: false,
               title: `${keyframe.value.split("/").pop()}`,
             };
           }),

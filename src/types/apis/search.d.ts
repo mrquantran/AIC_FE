@@ -1,6 +1,6 @@
 export type TSearchKeyframePayload = {
   model: TModel;
-  value: string | string[];
+  value: string | string[] | any;
 };
 
 export type TSearchParams = {
@@ -9,4 +9,4 @@ export type TSearchParams = {
   display: number
 };
 
-export type TModelSearch = "Text" | "Object" | "OCR";
+export type TModelSearch = "Text" | "Object" | "OCR" | "Temporal"
