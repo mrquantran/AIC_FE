@@ -16,7 +16,7 @@ interface CustomTableProps {
 
 const CustomTable: FunctionComponent<CustomTableProps> = ({ data }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, _] = useState<boolean>(false);
 
   const columns: TableColumnsType<TableListItem> = [
     {

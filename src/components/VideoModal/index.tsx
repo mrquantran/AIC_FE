@@ -136,6 +136,7 @@ const VideoModal = ({
   };
 
   const handleKeyframeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // @ts-ignore
     const newKeyframe = parseInt(e.target.value, 10);
     if (!isNaN(newKeyframe) && newKeyframe >= 0 && videoRef.current) {
       const newTime = newKeyframe / 25;

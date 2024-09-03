@@ -24,8 +24,8 @@ const renderRoute = (routes: TRoute[]): React.ReactNode[] =>
       children,
       component: Component,
       path,
-      page,
-      permission,
+      // page,
+      // permission,
     }) => {
       //   const AuthComponent = () => (
       //     <AuthWrapper

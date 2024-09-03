@@ -5,12 +5,9 @@ import {
   Card,
   Flex,
   Layout,
-  Modal,
   Row,
-  Space,
   Switch,
   Tabs,
-  Tag,
 } from "antd";
 import {
   PlusOutlined,

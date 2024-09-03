@@ -1,4 +1,3 @@
-import Table from "@/components/Table/Table";
 import { JSX } from "preact/jsx-runtime";
 import {
   Card,

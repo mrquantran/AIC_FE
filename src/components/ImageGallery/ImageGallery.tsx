@@ -1,5 +1,15 @@
 import Preact, { useEffect, useMemo, useState } from "preact/compat";
-import { Col, Collapse, Divider, Empty, Row, Image, Button, Flex, Tooltip } from "antd";
+import {
+  Col,
+  Collapse,
+  Divider,
+  Empty,
+  Row,
+  Image,
+  Button,
+  Flex,
+  Tooltip,
+} from "antd";
 import "./ImageGallery.scss"; // Import the CSS file
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
@@ -183,6 +193,12 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     });
   };
 
+  const isIncludeTemporalSearch = (value: string) => {
+    return mode !== "temporal" && temporalSearch.includes(value)
+      ? "selected"
+      : "";
+  };
+
   return (
     <>
       <VideoModal
@@ -202,7 +218,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
             <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
               {/* @ts-ignore */}
               <Image src={formatImagePath(image.value)} />
-              {showConfidence && renderRank(image.confidence)}
+
+              <Flex justify="center" align="center">
+                {showConfidence && renderRank(image.confidence)}
+              </Flex>
             </Col>
           ))}
         {group === "video" &&
@@ -235,13 +254,12 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                             placement="topLeft"
                           >
                             <div
-                              className={`image-wrapper ${
-                                temporalSearch.includes(
-                                  formatTemporalSearch(
-                                    keyframe.value,
-                                    keyframe.key
-                                  )
+                              className={`image-wrapper ${isIncludeTemporalSearch(
+                                formatTemporalSearch(
+                                  keyframe.value,
+                                  keyframe.key
                                 )
+                              )}
                                   ? "selected"
                                   : ""
                               }`}
@@ -299,13 +317,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               xl={4}
                             >
                               <div
-                                className={`image-wrapper ${
-                                  temporalSearch.includes(
-                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
-                                  )
-                                    ? "selected"
-                                    : ""
-                                }`}
+                                className={`image-wrapper ${isIncludeTemporalSearch(
+                                  `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
+                                )}`}
                                 onClick={() =>
                                   handleImageClick(
                                     keyframe?.index?.toString() || "",

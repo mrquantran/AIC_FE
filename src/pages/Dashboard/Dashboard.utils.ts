@@ -23,6 +23,7 @@ export const mapSearchResultsToTree = (
 ): TreeDataNode[] => {
   const { data } = searchResults;
 
+  // @ts-ignore
   const groupResults = handle_image_by_group(data);
 
   const treeData = groupResults.map((group, groupIndex) => {
