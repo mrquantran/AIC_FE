@@ -1,5 +1,5 @@
 import Preact, { useEffect, useMemo, useState } from "preact/compat";
-import { Col, Collapse, Divider, Empty, Row, Image, Button, Flex } from "antd";
+import { Col, Collapse, Divider, Empty, Row, Image, Button, Flex, Tooltip } from "antd";
 import "./ImageGallery.scss"; // Import the CSS file
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
@@ -230,37 +230,42 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                           lg={6}
                           xl={4}
                         >
-                          <div
-                            className={`image-wrapper ${
-                              temporalSearch.includes(
-                                formatTemporalSearch(
-                                  keyframe.value,
-                                  keyframe.key
-                                )
-                              )
-                                ? "selected"
-                                : ""
-                            }`}
-                            onClick={() =>
-                              handleImageClick(keyframe.key, keyframe.value)
-                            }
+                          <Tooltip
+                            title={`${keyframe.key}`}
+                            placement="topLeft"
                           >
-                            {/* @ts-ignore */}
-                            <Image
-                              preview={
-                                temporalSearchEnabled && mode !== "temporal"
-                                  ? false
-                                  : true
+                            <div
+                              className={`image-wrapper ${
+                                temporalSearch.includes(
+                                  formatTemporalSearch(
+                                    keyframe.value,
+                                    keyframe.key
+                                  )
+                                )
+                                  ? "selected"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                handleImageClick(keyframe.key, keyframe.value)
                               }
-                              src={formatImagePath(keyframe.value)}
-                            />
-                          </div>
+                            >
+                              {/* @ts-ignore */}
+                              <Image
+                                preview={
+                                  temporalSearchEnabled && mode !== "temporal"
+                                    ? false
+                                    : true
+                                }
+                                src={formatImagePath(keyframe.value)}
+                              />
+                            </div>
+                          </Tooltip>
                           <Flex justify="center" align="center">
                             {renderRank(keyframe.confidence)}
                             <Divider type="vertical"></Divider>
                             {keyframe.value.split("/").pop()}
-                            <Divider type="vertical"></Divider>
-                            {keyframe.key}
+                            {/* <Divider type="vertical"></Divider>
+                            {keyframe.key} */}
                             <Divider type="vertical"></Divider>
                             <Button
                               type="primary"
@@ -320,10 +325,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               </div>
                               <Flex justify="center" align="center">
                                 {renderRank(0)}
-                                <Divider type="vertical"></Divider>
+                                {/* <Divider type="vertical"></Divider>
                                 {keyframe.keyframe}
                                 <Divider type="vertical"></Divider>
-                                {keyframe.index}
+                                {keyframe.index} */}
                                 <Divider type="vertical"></Divider>
                                 <Button
                                   type="primary"

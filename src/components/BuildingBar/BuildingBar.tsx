@@ -99,7 +99,7 @@ const BuidlingBar: Preact.FunctionComponent = () => {
       {
         key: `tabText${key}`,
         tab: "Text",
-        content: <TextQuery tabKey={key} />,
+        content: <TextQuery tabKey={key} type="Text" />,
         icon: <FileTextOutlined style={styleIcon} />,
       },
       {
@@ -107,6 +107,12 @@ const BuidlingBar: Preact.FunctionComponent = () => {
         tab: "Object",
         content: <ObjectSelectQuery tabKey={key} />,
         icon: <CodeSandboxOutlined style={styleIcon} />,
+      },
+      {
+        key: `tabAudio${key}`,
+        tab: "Audio",
+        content: <TextQuery tabKey={key} type="Audio" />,
+        icon: <FileTextOutlined style={styleIcon} />,
       },
     ];
   };

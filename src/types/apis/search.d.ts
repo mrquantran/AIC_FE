@@ -15,4 +15,4 @@ export type TSearchNearestIndexFromKeyframePayload = {
   keyframe_id: number;
 };
 
-export type TModelSearch = "Text" | "Object" | "OCR" | "Temporal"
+export type TModelSearch = "Text" | "Object" | "OCR" | "Temporal" | "Audio";

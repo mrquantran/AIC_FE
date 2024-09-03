@@ -1,4 +1,4 @@
-import { Input, Space, Switch } from "antd";
+import { Input, Space } from "antd";
 import Preact, { useEffect, useCallback, useState } from "preact/compat";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchTerm } from "@/store/actions";
@@ -9,9 +9,10 @@ const { TextArea } = Input;
 
 interface ITextQuery {
   tabKey: number;
+  type: "Text" | "Audio"
 }
 
-const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
+const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey, type }) => {
   const dispatch = useDispatch();
   const searchTab = useSelector((state: TAppRootReducer) =>
     state?.searchState?.search.find((s) => s.tabKey === tabKey)
@@ -22,15 +23,10 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   // Local state to manage the input value
   const [inputValue, setInputValue] = useState(searchTab?.value ?? "");
-  const [ocr, setOcr] = useState(false);
 
   useEffect(() => {
-    if (ocr === true) {
-      dispatch(setSearchTerm("OCR", inputValue, tabKey));
-    } else {
-      dispatch(setSearchTerm("Text", inputValue, tabKey));
-    }
-  }, [dispatch, tabKey, ocr]);
+    dispatch(setSearchTerm(type, inputValue, tabKey));
+  }, [dispatch, tabKey]);
 
   useEffect(() => {
     setInputValue(searchTab?.value ?? "");
@@ -38,11 +34,7 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
-      if (ocr === true) {
-        dispatch(setSearchTerm("OCR", value, tabKey));
-      } else {
-        dispatch(setSearchTerm("Text", value, tabKey));
-      }
+      dispatch(setSearchTerm(type, value, tabKey));
     }, 300), // 300ms debounce delay
     [dispatch, tabKey]
   );
@@ -52,9 +44,6 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
     debouncedSetSearchTerm(e.target.value);
   };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setOcr(checked);
-  };
 
   useEffect(() => {
     return () => {
@@ -64,14 +53,6 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey }) => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      {/* <Switch
-        onChange={handleSwitchChange}
-        checkedChildren="OCR"
-        value={ocr}
-        size="small"
-        unCheckedChildren="OCR"
-        defaultChecked={false}
-      /> */}
       <TextArea
         rows={3}
         key={tabKey}

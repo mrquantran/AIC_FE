@@ -10,7 +10,8 @@ html,
 body,
 #app,
 #app>div:not(.tsqd-parent-container) {
-  height: 100vh
+  height: 100vh;
+  overflow: hidden
 }
 
 html,
@@ -62,4 +63,8 @@ body {
 
 .ant-menu{
   border-inline-end: none!important;
+}
+
+:where(.css-dev-only-do-not-override-p8b6i).ant-tabs .ant-tabs-tab+.ant-tabs-tab {
+  margin: 0 0 0 1.5rem;
 }
