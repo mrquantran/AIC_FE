@@ -110,12 +110,12 @@ const VideoModal = ({
     handleModalClose();
   };
 
-  const handleBackToKeyframe = () => {
-    if (videoRef.current) {
-      const startTime = keyframeIndex / 25; // Convert keyframe to seconds
-      videoRef.current.currentTime = startTime;
-    }
-  };
+  // const handleBackToKeyframe = () => {
+  //   if (videoRef.current) {
+  //     const startTime = keyframeIndex / 25; // Convert keyframe to seconds
+  //     videoRef.current.currentTime = startTime;
+  //   }
+  // };
 
   const handlePreviousKeyframe = () => {
     if (videoRef.current) {
@@ -222,9 +222,9 @@ const VideoModal = ({
             </Tooltip>
           </Space.Compact>
           <Flex gap={8} align="center">
-            <Button type="dashed" onClick={handleBackToKeyframe}>
+            {/* <Button type="dashed" onClick={handleBackToKeyframe}>
               Back to Start
-            </Button>
+            </Button> */}
             <Button
               onClick={() =>
                 handleCaptureKeyframe({

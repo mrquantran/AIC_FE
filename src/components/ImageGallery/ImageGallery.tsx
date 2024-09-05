@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
 import { setSelectedTemporalQuery } from "@/store/actions";
 import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
+import Toast from "../Toast";
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -90,14 +91,14 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   const { data, refetch, isFetching } = useVideoStream(groupId, videoId);
 
   const handlePlayVideo = (
-    videoId: string,
-    groupId: string,
-    keyframe: string
+    videoIdClicked: string,
+    groupIdClicked: string,
+    keyframeClicked: string
   ) => {
-    const keyframeIndex = parseInt(keyframe.split("/").pop() || "0", 10);
+    const keyframeIndex = parseInt(keyframeClicked.split("/").pop() || "0", 10);
 
-    setGroupId(groupId);
-    setVideoId(videoId);
+    setGroupId(groupIdClicked);
+    setVideoId(videoIdClicked);
     setKeyframeIndex(keyframeIndex);
     setIsModalVisible(true);
   };
@@ -169,7 +170,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
       ]);
 
       // Optionally close modal or any other side effect
-      handleModalClose();
+      Toast("Get Nearest Index Success", "success");
     }
   }, [isGetNearestIndexSuccess, dataNearestIndex]);
 

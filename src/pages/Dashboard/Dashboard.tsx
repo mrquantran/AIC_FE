@@ -157,8 +157,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
               />
             </Card>
           </Row>
-          <Row>
-            {/* @ts-ignore */}
+          {/* <Row>
             <Card style={{ width: "100%" }}>
               <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
                 Group, Sort by
@@ -184,7 +183,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                 />
               </Flex>
             </Card>
-          </Row>
+          </Row> */}
         </Col>
         <Col span={6}>
           {/* @ts-ignore */}
