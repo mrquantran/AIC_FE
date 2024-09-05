@@ -25,28 +25,6 @@ import type { TreeDataNode } from "antd";
 import { mapSearchResultsToTree } from "./Dashboard.utils";
 import { setClearTemporalSearch, setModeTab } from "@/store/actions";
 
-// const groupFormatOptions = [
-//   {
-//     value: "all",
-//     label: "Group All",
-//   },
-//   {
-//     value: "video",
-//     label: "Group by Video",
-//   },
-// ];
-
-// const groupSortOptions = [
-//   {
-//     value: "keyframe",
-//     label: "Sort by Keyframe Index",
-//   },
-//   {
-//     value: "score",
-//     label: "Sort by Score",
-//   },
-// ];
-
 export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
     (state: TAppRootReducer) => state.appState.modeTab
@@ -167,33 +145,6 @@ export const Dashboard: React.FC = (): JSX.Element => {
               />
             </Card>
           </Row>
-          {/* <Row>
-            <Card style={{ width: "100%" }}>
-              <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
-                Group, Sort by
-              </p>
-              <Flex gap="middle" horizontal>
-                <Select
-                  defaultValue="video"
-                  style={{ width: 200 }}
-                  onChange={(value: string) =>
-                    setGroupFormat(value as "all" | "video")
-                  }
-                  options={groupFormatOptions}
-                  value={groupFromat}
-                />
-                <Select
-                  defaultValue="score"
-                  style={{ width: 200 }}
-                  options={groupSortOptions}
-                  onChange={(value: string) =>
-                    setGroupSort(value as "keyframe" | "score")
-                  }
-                  value={groupSort}
-                />
-              </Flex>
-            </Card>
-          </Row> */}
         </Col>
         <Col span={6}>
           {/* @ts-ignore */}
@@ -221,6 +172,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
           {/* row with two card */}
           <Row gutter={16} style={{ marginBottom: "1.5rem" }}>
             <Col span={12}>
+              {/* @ts-ignore */}
               <Card bordered={false}>
                 <Statistic
                   title="Total Group"
@@ -231,6 +183,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
               </Card>
             </Col>
             <Col span={12}>
+              {/* @ts-ignore */}
               <Card bordered={false}>
                 <Statistic
                   title="Total Video"
@@ -244,6 +197,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
               </Card>
             </Col>
           </Row>
+          {/* @ts-ignore */}
           <Card bordered={false}>
             <Statistic
               title="Video have most keyframe"

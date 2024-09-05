@@ -4,6 +4,8 @@ import {
   CaretLeftOutlined,
   CaretRightOutlined,
   ClockCircleOutlined,
+  ForwardOutlined,
+  BackwardOutlined,
 } from "@ant-design/icons";
 
 interface IVideoModalProps {
@@ -35,7 +37,6 @@ const VideoModal = ({
   keyframeIndex = 0,
 }: IVideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const [playStatus, setPlayStatus] = useState("paused");
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
@@ -53,10 +54,17 @@ const VideoModal = ({
     return canvas.toDataURL("image/png");
   };
 
+  // Handle keyframe changes to set the video currentTime properly
+  useEffect(() => {
+    if (videoRef.current && isModalVisible) {
+      const startTime = keyframeIndex / 25; // Convert keyframe to seconds
+      videoRef.current.currentTime = startTime;
+    }
+  }, [keyframeIndex, isModalVisible]);
+
   useEffect(() => {
     if (videoRef.current) {
       const handleLoadedMetadata = () => {
-        setIsVideoReady(true);
         if (videoRef.current) {
           const startTime = keyframeIndex / 25; // Convert keyframe to seconds
           videoRef.current.currentTime = startTime;
@@ -95,7 +103,6 @@ const VideoModal = ({
 
   useEffect(() => {
     // Reset video state when videoSrc changes
-    setIsVideoReady(false);
     if (videoRef.current) {
       videoRef.current.load(); // Force reload of video
     }
@@ -106,29 +113,21 @@ const VideoModal = ({
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-    setIsVideoReady(false);
     handleModalClose();
   };
 
-  // const handleBackToKeyframe = () => {
-  //   if (videoRef.current) {
-  //     const startTime = keyframeIndex / 25; // Convert keyframe to seconds
-  //     videoRef.current.currentTime = startTime;
-  //   }
-  // };
-
-  const handlePreviousKeyframe = () => {
+  const handlePreviousKeyframe = (decrease: number = 1) => {
     if (videoRef.current) {
-      const previousKeyframe = Math.max(currentKeyframe - 1, 0);
+      const previousKeyframe = Math.max(currentKeyframe - decrease, 0);
       const newTime = previousKeyframe / 25;
       videoRef.current.currentTime = newTime;
       setCurrentKeyframe(previousKeyframe);
     }
   };
 
-  const handleNextKeyframe = () => {
+  const handleNextKeyframe = (increase: number = 1) => {
     if (videoRef.current) {
-      const nextKeyframe = currentKeyframe + 1;
+      const nextKeyframe = currentKeyframe + increase;
       const newTime = nextKeyframe / 25;
       videoRef.current.currentTime = newTime;
       setCurrentKeyframe(nextKeyframe);
@@ -136,7 +135,6 @@ const VideoModal = ({
   };
 
   const handleKeyframeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // @ts-ignore
     const newKeyframe = parseInt(e.target.value, 10);
     if (!isNaN(newKeyframe) && newKeyframe >= 0 && videoRef.current) {
       const newTime = newKeyframe / 25;
@@ -145,13 +143,25 @@ const VideoModal = ({
     }
   };
 
+  // Add this function to format time
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
+  useEffect(() => {
+    console.log("Video source changed:", videoSrc);
+  }, [videoSrc]);
+
   return (
     <Modal
       visible={isModalVisible}
       footer={null}
-      width="65%"
+      width="140vh" // Change width to 90% or a size that fits your needs
       title={videoTitle}
       onCancel={handleVideoClose}
+      style={{ top: "5%", left: "auto", right: "auto", margin: "0 auto" }} // Ensure it's centered
     >
       <Flex vertical justify="center" align="center">
         <Flex width="100%" justify="center" align="center">
@@ -162,11 +172,10 @@ const VideoModal = ({
               width: "100%",
               aspectRatio: "16 / 9",
             }}
-            poster="/api/placeholder/640/360"
           >
             {videoSrc && <source src={videoSrc} type="video/mp4" />}
           </video>
-          {(isFetching || !isVideoReady) && (
+          {isFetching && (
             <Flex
               justify="center"
               align="center"
@@ -193,38 +202,41 @@ const VideoModal = ({
         >
           <Space.Compact block>
             <Tooltip title="Play Status" placement="bottom">
-              <Input style={{ width: "15%" }} value={playStatus} readOnly />
+              <Input style={{ width: "6rem" }} value={playStatus} readOnly />
             </Tooltip>
             <Button
-              onClick={handlePreviousKeyframe}
+              onClick={() => handlePreviousKeyframe(1)}
               icon={<CaretLeftOutlined />}
+            />
+            <Button
+              onClick={() => handlePreviousKeyframe(2)}
+              icon={<BackwardOutlined />}
             />
             <Tooltip title="Keyframe Index" placement="bottom">
               <Input
-                style={{ width: "12%" }}
+                style={{ width: "6rem" }}
                 value={currentKeyframe}
                 onChange={handleKeyframeChange}
               />
             </Tooltip>
             <Button
-              onClick={handleNextKeyframe}
+              onClick={() => handleNextKeyframe(1)}
               icon={<CaretRightOutlined />}
             />
-
-            <Tooltip title="Current Time (s)" placement="bottom">
+            <Button
+              onClick={() => handleNextKeyframe(2)}
+              icon={<ForwardOutlined />}
+            />
+            <Tooltip title="Current Time (MM:SS)" placement="bottom">
               <Input
-                style={{ width: "16%" }}
+                style={{ width: "8rem" }}
                 prefix={<ClockCircleOutlined />}
-                // Display time in format mintues:seconds, formatted to 2 decimal places
-                value={currentSecond.toFixed(1)}
+                value={formatTime(currentSecond)}
                 readOnly
               />
             </Tooltip>
           </Space.Compact>
           <Flex gap={8} align="center">
-            {/* <Button type="dashed" onClick={handleBackToKeyframe}>
-              Back to Start
-            </Button> */}
             <Button
               onClick={() =>
                 handleCaptureKeyframe({

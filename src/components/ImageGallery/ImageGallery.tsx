@@ -32,6 +32,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   showConfidence = false,
   group = "video",
 }) => {
+  const dispatch = useDispatch();
   const mode = useSelector((state: TAppRootReducer) => state.appState.modeTab);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
@@ -39,13 +40,32 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const dispatch = useDispatch();
   const temporalSearchEnabled = useSelector(
     (state: TAppRootReducer) => state.appState.temporalSearchEnabled
   );
   const temporalSearch = useSelector(
     (state: TAppRootReducer) => state.searchState.temporalSearch
   );
+  const [captureKeyframe, setCaptureKeyframe] = useState<
+    {
+      keyframe: number;
+      image: string | null;
+      videoId: string;
+      groupId: string;
+      index?: number; // Add key field to state
+    }[]
+  >([]);
+  const { data, refetch, isFetching, isSuccess } = useVideoStream(
+    groupId,
+    videoId
+  );
+
+  const isIncludeTemporalSearch = (value: string) => {
+    return mode !== "temporal" && temporalSearch.includes(value)
+      ? "selected"
+      : "";
+  };
+
   if (images.length === 0) {
     return <Empty />;
   }
@@ -70,38 +90,16 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   );
 
   useEffect(() => {
-    if (groupId && videoId && !isFetching) {
-      refetch();
+    if (isSuccess) {
+      Toast(`Load Video ${videoId} Group ${groupId}`, "success", "bottom-right");
+    }
+  }, [isSuccess, isFetching]);
+
+  useEffect(() => {
+    if (groupId && videoId) {
+      refetch(); // Only fetch if either videoId or groupId is different
     }
   }, [groupId, videoId]);
-
-  const handleImageClick = (index: string, value: string) => {
-    const imageSplitted = value.split("/");
-    let group = imageSplitted[0];
-    let video = imageSplitted[1];
-
-    const temporalQuery = `${group}/${video}/${index}`;
-
-    if (!temporalSearchEnabled || mode === "temporal") {
-      return;
-    }
-    dispatch(setSelectedTemporalQuery(temporalQuery));
-  };
-
-  const { data, refetch, isFetching } = useVideoStream(groupId, videoId);
-
-  const handlePlayVideo = (
-    videoIdClicked: string,
-    groupIdClicked: string,
-    keyframeClicked: string
-  ) => {
-    const keyframeIndex = parseInt(keyframeClicked.split("/").pop() || "0", 10);
-
-    setGroupId(groupIdClicked);
-    setVideoId(videoIdClicked);
-    setKeyframeIndex(keyframeIndex);
-    setIsModalVisible(true);
-  };
 
   const formatTemporalSearch = (keyframe: string, index: string) => {
     const imageSplitted = keyframe?.split("/");
@@ -127,24 +125,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     };
   }, [data]);
 
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    setVideoSrc(null);
-    setGroupId(null);
-    setVideoId(null);
-    setKeyframeIndex(0);
-  };
-
-  const [captureKeyframe, setCaptureKeyframe] = useState<
-    {
-      keyframe: number;
-      image: string | null;
-      videoId: string;
-      groupId: string;
-      index?: number; // Add key field to state
-    }[]
-  >([]);
-
   const {
     data: dataNearestIndex,
     mutate: mutateNearestIndex,
@@ -153,10 +133,8 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
 
   useEffect(() => {
     if (isGetNearestIndexSuccess && dataNearestIndex?.data) {
-      console.log("Nearest Index Data:", dataNearestIndex);
       const { video_id, group_id, frame_id, index, value } =
         dataNearestIndex?.data;
-      // Update setCaptureKeyframe with the key from nearest index data
 
       setCaptureKeyframe((prev) => [
         ...prev,
@@ -194,10 +172,42 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     });
   };
 
-  const isIncludeTemporalSearch = (value: string) => {
-    return mode !== "temporal" && temporalSearch.includes(value)
-      ? "selected"
-      : "";
+  const handlePlayVideo = (
+    videoIdClicked: string,
+    groupIdClicked: string,
+    keyframeClicked: string
+  ) => {
+    const keyframeIndex = parseInt(keyframeClicked.split("/").pop() || "0", 10);
+
+    if (videoId === videoIdClicked && groupId === groupIdClicked) {
+      // Only update the keyframeIndex and open the modal
+      setKeyframeIndex(keyframeIndex);
+      setIsModalVisible(true);
+    } else {
+      // Fetch the new video stream only when videoId or groupId changes
+      setGroupId(groupIdClicked);
+      setVideoId(videoIdClicked);
+      setKeyframeIndex(keyframeIndex);
+      setIsModalVisible(true);
+      refetch(); // Trigger the video stream refetch
+    }
+  };
+
+  const handleImageClick = (index: string, value: string) => {
+    const imageSplitted = value.split("/");
+    let group = imageSplitted[0];
+    let video = imageSplitted[1];
+
+    const temporalQuery = `${group}/${video}/${index}`;
+
+    if (!temporalSearchEnabled || mode === "temporal") {
+      return;
+    }
+    dispatch(setSelectedTemporalQuery(temporalQuery));
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
   };
 
   return (
@@ -221,8 +231,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
               <Image src={formatImagePath(image.value)} />
               <Flex justify="center" align="center">
                 {showConfidence && renderRank(image.confidence)}
-                <Divider type="vertical"></Divider>{`L${image.group_id}`}
-                <Divider type="vertical"></Divider>{`V${image.video_id}`}
+                <Divider type="vertical"></Divider>
+                {`L${image.group_id}`}
+                <Divider type="vertical"></Divider>
+                {`V${image.video_id}`}
               </Flex>
             </Col>
           ))}
@@ -341,10 +353,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               </div>
                               <Flex justify="center" align="center">
                                 {renderRank(0)}
-                                {/* <Divider type="vertical"></Divider>
-                                {keyframe.keyframe}
-                                <Divider type="vertical"></Divider>
-                                {keyframe.index} */}
                                 <Divider type="vertical"></Divider>
                                 <Button
                                   type="primary"
