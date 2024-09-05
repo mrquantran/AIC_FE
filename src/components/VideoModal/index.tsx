@@ -1,12 +1,26 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Modal, Spin, Flex, Space, Input, Button, Tooltip } from "antd";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import {
-  CaretLeftOutlined,
-  CaretRightOutlined,
+  Modal,
+  Spin,
+  Flex,
+  Space,
+  Input,
+  Button,
+  Tooltip,
+  InputNumber,
+  Row,
+  Col,
+} from "antd";
+import {
   ClockCircleOutlined,
   ForwardOutlined,
   BackwardOutlined,
+  CameraOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
+import { Slider } from "antd";
+import { useSelector } from "react-redux";
+import { TAppRootReducer } from "@/store";
 
 interface IVideoModalProps {
   isModalVisible: boolean;
@@ -23,7 +37,21 @@ interface IVideoModalProps {
     videoId: string;
     groupId: string;
   }) => void;
+  handleSaveHistory: ([start, end]: [number, number]) => void;
 }
+
+const captureImageFromVideo = (video: HTMLVideoElement) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  }
+
+  return canvas.toDataURL("image/png");
+};
 
 const VideoModal = ({
   isModalVisible,
@@ -35,25 +63,25 @@ const VideoModal = ({
   video_id,
   group_id,
   keyframeIndex = 0,
+  handleSaveHistory,
 }: IVideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [playStatus, setPlayStatus] = useState("paused");
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
-
-  const captureImageFromVideo = (video: HTMLVideoElement) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const context = canvas.getContext("2d");
-    if (context) {
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    }
-
-    return canvas.toDataURL("image/png");
-  };
-
+  const [duration, setDuration] = useState(0); // Track video duration
+  const [range, setRange] = useState<[number, number]>([0, 0]);
+  const marks = useMemo(() => {
+    return {
+      0: "0s",
+      [duration]: `${duration.toFixed(0)}s`,
+      [keyframeIndex / 25]: {
+        style: {
+          color: "#52C41A",
+        },
+        label: `${(keyframeIndex / 25).toFixed(0)}s`,
+      },
+    };
+  }, [duration]);
   // Handle keyframe changes to set the video currentTime properly
   useEffect(() => {
     if (videoRef.current && isModalVisible) {
@@ -66,13 +94,12 @@ const VideoModal = ({
     if (videoRef.current) {
       const handleLoadedMetadata = () => {
         if (videoRef.current) {
-          const startTime = keyframeIndex / 25; // Convert keyframe to seconds
+          const videoDuration = videoRef.current.duration;
+          setDuration(videoDuration); // Set the duration when metadata is loaded
+          const startTime = keyframeIndex / 25;
           videoRef.current.currentTime = startTime;
         }
       };
-
-      const handlePlay = () => setPlayStatus("play");
-      const handlePause = () => setPlayStatus("pause");
 
       const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -83,8 +110,6 @@ const VideoModal = ({
       };
 
       videoRef.current.addEventListener("loadedmetadata", handleLoadedMetadata);
-      videoRef.current.addEventListener("play", handlePlay);
-      videoRef.current.addEventListener("pause", handlePause);
       videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
 
       return () => {
@@ -93,8 +118,6 @@ const VideoModal = ({
             "loadedmetadata",
             handleLoadedMetadata
           );
-          videoRef.current.removeEventListener("play", handlePlay);
-          videoRef.current.removeEventListener("pause", handlePause);
           videoRef.current.removeEventListener("timeupdate", handleTimeUpdate);
         }
       };
@@ -135,7 +158,9 @@ const VideoModal = ({
   };
 
   const handleKeyframeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newKeyframe = parseInt(e.target.value, 10);
+    // fix Property 'value' does not exist on type 'EventTarget'.
+    // const newKeyframe = parseInt(e.target.value, 10);
+    const newKeyframe = parseInt(e.currentTarget.value, 10);
     if (!isNaN(newKeyframe) && newKeyframe >= 0 && videoRef.current) {
       const newTime = newKeyframe / 25;
       videoRef.current.currentTime = newTime;
@@ -143,25 +168,60 @@ const VideoModal = ({
     }
   };
 
-  // Add this function to format time
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-  useEffect(() => {
-    console.log("Video source changed:", videoSrc);
-  }, [videoSrc]);
+  const onRangeChange = (value: [number, number]) => {
+    if (videoRef.current) {
+      if (value[0] !== range[0]) {
+        videoRef.current.currentTime = value[0];
+        setCurrentKeyframe(Math.floor(value[0] * 25));
+      }
+
+      if (value[1] !== range[1]) {
+        videoRef.current.currentTime = value[1];
+        setCurrentKeyframe(Math.floor(value[1] * 25));
+      }
+
+      setRange(value);
+    }
+  };
+
+  const handleChangeInput = (index: number, value: number) => {
+    if (videoRef.current) {
+      const newRange: [number, number] = [...range];
+      newRange[index] = value;
+      setRange(newRange);
+
+      if (index === 0) {
+        videoRef.current.currentTime = value;
+        setCurrentKeyframe(Math.floor(value * 25));
+      }
+
+      if (index === 1) {
+        videoRef.current.currentTime = value;
+        setCurrentKeyframe(Math.floor(value * 25));
+      }
+    }
+  };
+
+  const handleSaveRange = () => {
+    if (range[0] && range[1]) {
+      handleSaveHistory([range[0] * 25, range[1] * 25]);
+    }
+  };
 
   return (
     <Modal
       visible={isModalVisible}
       footer={null}
-      width="140vh" // Change width to 90% or a size that fits your needs
+      width="145vh"
       title={videoTitle}
       onCancel={handleVideoClose}
-      style={{ top: "5%", left: "auto", right: "auto", margin: "0 auto" }} // Ensure it's centered
+      style={{ top: "5%", left: "auto", right: "auto", margin: "0 auto" }}
     >
       <Flex vertical justify="center" align="center">
         <Flex width="100%" justify="center" align="center">
@@ -192,68 +252,107 @@ const VideoModal = ({
             </Flex>
           )}
         </Flex>
-        <Flex
-          align="center"
-          justify="space-between"
+        <Row
           style={{
             marginTop: "1rem",
             width: "100%",
           }}
+          gutter={8}
         >
-          <Space.Compact block>
-            <Tooltip title="Play Status" placement="bottom">
-              <Input style={{ width: "6rem" }} value={playStatus} readOnly />
-            </Tooltip>
-            <Button
-              onClick={() => handlePreviousKeyframe(1)}
-              icon={<CaretLeftOutlined />}
-            />
-            <Button
-              onClick={() => handlePreviousKeyframe(2)}
-              icon={<BackwardOutlined />}
-            />
-            <Tooltip title="Keyframe Index" placement="bottom">
-              <Input
-                style={{ width: "6rem" }}
-                value={currentKeyframe}
-                onChange={handleKeyframeChange}
+          <Col span={4}>
+            <Space.Compact block>
+              {/* <Button
+                onClick={() => handlePreviousKeyframe(1)}
+                icon={<CaretLeftOutlined />}
+              /> */}
+              <Button
+                onClick={() => handlePreviousKeyframe(2)}
+                icon={<BackwardOutlined />}
               />
-            </Tooltip>
-            <Button
-              onClick={() => handleNextKeyframe(1)}
-              icon={<CaretRightOutlined />}
-            />
-            <Button
-              onClick={() => handleNextKeyframe(2)}
-              icon={<ForwardOutlined />}
-            />
-            <Tooltip title="Current Time (MM:SS)" placement="bottom">
-              <Input
-                style={{ width: "8rem" }}
-                prefix={<ClockCircleOutlined />}
-                value={formatTime(currentSecond)}
-                readOnly
+              <Tooltip title="Keyframe Index" placement="bottom">
+                <Input
+                  style={{ width: "6rem" }}
+                  value={currentKeyframe}
+                  onChange={handleKeyframeChange}
+                />
+              </Tooltip>
+              {/* <Button
+                onClick={() => handleNextKeyframe(1)}
+                icon={<CaretRightOutlined />}
+              /> */}
+              <Button
+                onClick={() => handleNextKeyframe(2)}
+                icon={<ForwardOutlined />}
               />
-            </Tooltip>
-          </Space.Compact>
-          <Flex gap={8} align="center">
-            <Button
-              onClick={() =>
-                handleCaptureKeyframe({
-                  keyframe: currentKeyframe,
-                  image: videoRef.current
-                    ? captureImageFromVideo(videoRef.current)
-                    : null,
-                  videoId: video_id,
-                  groupId: group_id,
-                })
-              }
-            >
-              Capture Keyframe
-            </Button>
-            <Button type="primary">Save History</Button>
-          </Flex>
-        </Flex>
+              <Tooltip title="Current Time (MM:SS)" placement="bottom">
+                <Input
+                  style={{ width: "7rem" }}
+                  prefix={<ClockCircleOutlined />}
+                  value={formatTime(currentSecond)}
+                  readOnly
+                />
+              </Tooltip>
+            </Space.Compact>
+          </Col>
+          <Col span={13} align="start">
+            <Slider
+              range={true}
+              marks={marks}
+              max={duration}
+              value={range}
+              tooltip={{
+                formatter: (value: number) => `${value * 25}`,
+              }}
+              onChange={onRangeChange}
+              draggableTrack
+            />
+          </Col>
+          <Col span={7} align="end">
+            <Space.Compact>
+              {/* start range */}
+              <Tooltip title={range[0] * 25} placement="bottomLeft">
+                <InputNumber
+                  style={{ width: "8vh" }}
+                  value={range[0]}
+                  defaultValue={0}
+                  onChange={(value: number) => handleChangeInput(0, value)}
+                  formatter={(value: number) => `${value * 25 || 0}`}
+                />
+              </Tooltip>
+              {/* end range */}
+              <Tooltip title={range[1] * 25} placement="bottomLeft">
+                <InputNumber
+                  style={{ width: "8vh" }}
+                  value={range[1]}
+                  defaultValue={0}
+                  onChange={(value: number) => handleChangeInput(1, value)}
+                  formatter={(value: number) => `${value * 25 || 0}`}
+                />
+              </Tooltip>
+              <Input style={{ width: "8vh" }} placeholder="Answer" />
+              <Button
+                type="primary"
+                icon={<SaveOutlined />}
+                onClick={handleSaveRange}
+              >
+                Save
+              </Button>
+              <Button
+                onClick={() => {
+                  handleCaptureKeyframe({
+                    keyframe: range[0],
+                    image: videoRef.current
+                      ? captureImageFromVideo(videoRef.current)
+                      : null,
+                    videoId: video_id,
+                    groupId: group_id,
+                  });
+                }}
+                icon={<CameraOutlined />}
+              ></Button>
+            </Space.Compact>
+          </Col>
+        </Row>
       </Flex>
     </Modal>
   );

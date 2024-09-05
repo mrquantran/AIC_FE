@@ -12,8 +12,15 @@ export type TAppState = {
   };
   temporalSearchEnabled: boolean;
   objectNames: string[];
-  modeTab: "image" | "table" | "temporal"
+  modeTab: "image" | "table" | "temporal";
+  history: THistory[];
 };
+
+export interface THistory {
+  range: [number, number];
+  videoId: number;
+  groupId: number;
+}
 
 const initialAppState: TAppState = {
   apiError: "",
@@ -26,6 +33,7 @@ const initialAppState: TAppState = {
   temporalSearchEnabled: false,
   objectNames: [],
   modeTab: "image",
+  history: [],
 };
 
 export type TAppActionType = ActionType<typeof actions>;
@@ -35,6 +43,19 @@ export default (
   action: TAppActionType
 ): TAppState => {
   switch (action.type) {
+    // add new item to history
+    case getType(actions.clearHistory):
+      return update(state, {
+        history: {
+          $set: [],
+        },
+      });
+    case getType(actions.addHistory):
+      return update(state, {
+        history: {
+          $unshift: [action.payload],
+        },
+      });
     case getType(actions.setTemporalSearchEnabled):
       return update(state, {
         temporalSearchEnabled: {

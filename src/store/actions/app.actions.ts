@@ -25,3 +25,12 @@ export const setModeTab = createAction(
   '@api/SET_MODE_TAB',
   (modeTab: TAppState['modeTab']) => modeTab
 )()
+
+export const addHistory = createAction(
+  '@api/ADD_HISTORY',
+  (history: TAppState['history'][0]) => history
+)()
+
+export const clearHistory = createAction(
+  '@api/CLEAR_HISTORY'
+)()

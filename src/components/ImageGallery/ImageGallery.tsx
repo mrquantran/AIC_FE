@@ -22,9 +22,10 @@ import {
 } from "./ImageGallery.utils";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
-import { setSelectedTemporalQuery } from "@/store/actions";
+import { addHistory, setSelectedTemporalQuery } from "@/store/actions";
 import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
 import Toast from "../Toast";
+import { THistory } from "@/store/reducers/app.reducers";
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -45,6 +46,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   );
   const temporalSearch = useSelector(
     (state: TAppRootReducer) => state.searchState.temporalSearch
+  );
+  const historyState = useSelector(
+    (state: TAppRootReducer) => state.appState.history
   );
   const [captureKeyframe, setCaptureKeyframe] = useState<
     {
@@ -91,7 +95,11 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
 
   useEffect(() => {
     if (isSuccess) {
-      Toast(`Load Video ${videoId} Group ${groupId}`, "success", "bottom-right");
+      Toast(
+        `Load Video ${videoId} Group ${groupId}`,
+        "success",
+        "bottom-right"
+      );
     }
   }, [isSuccess, isFetching]);
 
@@ -152,8 +160,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     }
   }, [isGetNearestIndexSuccess, dataNearestIndex]);
 
-  // Implement handleCaptureKeyframe
-  // Implement handleCaptureKeyframe to update imageGroup
   const handleCaptureKeyframe = ({
     keyframe,
     videoId,
@@ -210,6 +216,50 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     setIsModalVisible(false);
   };
 
+  const handleSaveHistory = (range: [number, number]) => {
+    const history: THistory = {
+      range: range, // range of keyframes
+      videoId: Number(videoId) || 0,
+      groupId: Number(groupId) || 0,
+    };
+
+    // // Validation: Check total columns and no duplicates
+    // const totalFrames = historyState.reduce((sum, item) => {
+    //   return sum + (item.range[1] - item.range[0] + 1); // Calculate total frames from each range
+    // }, 0);
+
+    // // Add the new history range frames to the total
+    // const newRangeFrames = range[1] - range[0] + 1;
+    // if (totalFrames + newRangeFrames > 100) {
+    //   Toast("Total frame count exceeds 100, unable to save.", "error");
+    //   return; // Exit if the total exceeds 100
+    // }
+
+    // // Check for duplicates
+    // const isDuplicate = historyState.some(
+    //   (item) =>
+    //     (item.videoId === history.videoId &&
+    //       item.groupId === history.groupId &&
+    //       //  check range is item not overlap with any range in history
+    //       history.range[0] >= item.range[0] &&
+    //       history.range[0] <= item.range[1]) ||
+    //     (history.range[1] >= item.range[0] &&
+    //       history.range[1] <= item.range[1]) ||
+    //     (item.range[0] >= history.range[0] &&
+    //       item.range[0] <= history.range[1]) ||
+    //     (item.range[1] >= history.range[0] && item.range[1] <= history.range[1])
+    // );
+
+    // if (isDuplicate) {
+    //   Toast("Duplicate entry detected, unable to save.", "error");
+    //   return; // Exit if a duplicate is found
+    // }
+
+    // If validation passes, dispatch the action to add history
+    dispatch(addHistory(history));
+    Toast("Save History", "success");
+  };
+
   return (
     <>
       <VideoModal
@@ -222,6 +272,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
         video_id={videoId || ""}
         group_id={groupId || ""}
         handleCaptureKeyframe={handleCaptureKeyframe}
+        handleSaveHistory={handleSaveHistory}
       />
       <Row gutter={[16, 16]}>
         {group === "all" &&
@@ -353,6 +404,8 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               </div>
                               <Flex justify="center" align="center">
                                 {renderRank(0)}
+                                <Divider type="vertical"></Divider>
+                                {keyframe.keyframe}
                                 <Divider type="vertical"></Divider>
                                 <Button
                                   type="primary"

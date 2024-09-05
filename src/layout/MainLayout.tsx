@@ -23,6 +23,7 @@ import { AppError } from "@/components/ErrorHandler";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
 import {
+  clearHistory,
   clearSearchQuery,
   setDisabledTabs,
   setEnabledTabs,
@@ -208,6 +209,7 @@ const MainLayout: React.FC = () => {
         dispatch(clearSearchQuery());
         dispatch(setTemporalSearchEnabled(false));
         dispatch(setModeTab("image"));
+        dispatch(clearHistory());
         Toast("Search queries cleared", "success");
       }
     });

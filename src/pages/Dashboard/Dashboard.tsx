@@ -29,7 +29,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
     (state: TAppRootReducer) => state.appState.modeTab
   );
-  const [selectTop, setSelectTop] = useState<number>(20);
+  const [selectTop, setSelectTop] = useState<number>(24);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
   // const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
   const searchResult = useSelector(
@@ -125,7 +125,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                   options={[
                     { value: 5, label: "5" },
                     { value: 10, label: "10" },
-                    { value: 20, label: "20" },
+                    { value: 24, label: "24" },
                     { value: 15, label: "15" },
                     { value: 30, label: "30" },
                     { value: 50, label: "50" },
