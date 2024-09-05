@@ -219,9 +219,10 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
             <Col key={image.value} xs={24} sm={12} md={8} lg={6} xl={4}>
               {/* @ts-ignore */}
               <Image src={formatImagePath(image.value)} />
-
               <Flex justify="center" align="center">
                 {showConfidence && renderRank(image.confidence)}
+                <Divider type="vertical"></Divider>{`L${image.group_id}`}
+                <Divider type="vertical"></Divider>{`V${image.video_id}`}
               </Flex>
             </Col>
           ))}

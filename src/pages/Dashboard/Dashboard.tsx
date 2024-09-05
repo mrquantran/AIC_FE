@@ -16,40 +16,44 @@ import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
-import { FolderOutlined, YoutubeOutlined } from "@ant-design/icons";
+import {
+  FolderOutlined,
+  YoutubeOutlined,
+  FileImageOutlined,
+} from "@ant-design/icons";
 import type { TreeDataNode } from "antd";
 import { mapSearchResultsToTree } from "./Dashboard.utils";
 import { setClearTemporalSearch, setModeTab } from "@/store/actions";
 
-const groupFormatOptions = [
-  {
-    value: "all",
-    label: "Group All",
-  },
-  {
-    value: "video",
-    label: "Group by Video",
-  },
-];
+// const groupFormatOptions = [
+//   {
+//     value: "all",
+//     label: "Group All",
+//   },
+//   {
+//     value: "video",
+//     label: "Group by Video",
+//   },
+// ];
 
-const groupSortOptions = [
-  {
-    value: "keyframe",
-    label: "Sort by Keyframe Index",
-  },
-  {
-    value: "score",
-    label: "Sort by Score",
-  },
-];
+// const groupSortOptions = [
+//   {
+//     value: "keyframe",
+//     label: "Sort by Keyframe Index",
+//   },
+//   {
+//     value: "score",
+//     label: "Sort by Score",
+//   },
+// ];
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
     (state: TAppRootReducer) => state.appState.modeTab
   );
-  const [selectTop, setSelectTop] = useState<number>(15);
+  const [selectTop, setSelectTop] = useState<number>(20);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
-  const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
+  // const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
@@ -64,7 +68,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
   const handleModeChange = (e: any) => {
     dispatch(setModeTab(e.target.value));
     if (modeTab === "temporal" && e.target.value === "image") {
-      dispatch(setClearTemporalSearch())
+      dispatch(setClearTemporalSearch());
     }
   };
 
@@ -89,47 +93,48 @@ export const Dashboard: React.FC = (): JSX.Element => {
     return new Set(groupIds).size;
   };
 
+  // output: return video_id with most keyframe, and return total keyframe of that video
+  const getVideoHaveMostKeyframe = (data: any) => {
+    // if data is empty, return none, 0
+    if (!data || data.length === 0) {
+      return {
+        videoId: 0,
+        maxKeyframe: 0,
+      };
+    }
+
+    const videoIds = data.map((item: any) => item.video_id);
+    const videoIdWithMostKeyframe = videoIds.reduce((acc: any, curr: any) => {
+      if (!acc[curr]) {
+        acc[curr] = 1;
+      } else {
+        acc[curr]++;
+      }
+      return acc;
+    }, {});
+
+    // fix: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+    const maxKeyframe = Math.max(
+      ...(Object.values(videoIdWithMostKeyframe) as number[])
+    );
+    const videoId = Object.keys(videoIdWithMostKeyframe).find(
+      (key) => videoIdWithMostKeyframe[key] === maxKeyframe
+    );
+
+    return {
+      videoId,
+      maxKeyframe,
+    };
+  };
+
   return (
     <>
       {/* @ts-ignore */}
-      <Row gutter={16} style={{ marginBottom: "1.5rem" }}>
-        <Col span={8}>
-          {/* @ts-ignore */}
-          <Card bordered={false}>
-            <Statistic
-              title="Total Group"
-              value={getTotalGroupFromResult(searchResult?.data) || 0}
-              precision={0}
-              prefix={<FolderOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          {/* @ts-ignore */}
-          <Card bordered={false}>
-            <Statistic
-              title="Total Video"
-              value={getTotalVideoFromResult(searchResult?.data) || 0}
-              precision={0}
-              prefix={<YoutubeOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          {/* @ts-ignore */}
-          <Card bordered={false}>
-            <Statistic
-              title="Respone time"
-              value={0.5}
-              precision={2}
-              suffix="s"
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={16} style={{ marginBottom: "2rem " }}>
+      <Row gutter={16} style={{ marginBottom: "2rem" }}>
         <Col span={18}>
-          <Row style={{ width: "100%", marginBottom: "1.5rem" }}>
+          <Row
+            style={{ width: "100%", height: "100%", marginBottom: "1.5rem" }}
+          >
             {/* @ts-ignore */}
             <Card
               style={{ width: "100%" }}
@@ -142,6 +147,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                   options={[
                     { value: 5, label: "5" },
                     { value: 10, label: "10" },
+                    { value: 20, label: "20" },
                     { value: 15, label: "15" },
                     { value: 30, label: "30" },
                     { value: 50, label: "50" },
@@ -151,7 +157,11 @@ export const Dashboard: React.FC = (): JSX.Element => {
             >
               <ImageGallery
                 top={selectTop}
-                images={temporalSearchEnabled ? temporalSearchResult?.data : searchResult?.data}
+                images={
+                  temporalSearchEnabled
+                    ? temporalSearchResult?.data
+                    : searchResult?.data
+                }
                 showConfidence={true}
                 group={"all"}
               />
@@ -187,7 +197,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
         </Col>
         <Col span={6}>
           {/* @ts-ignore */}
-          <Card style={{ marginBottom: "2rem", height: "100%" }}>
+          <Card style={{ marginBottom: "1.5rem" }}>
             <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
               Search Summary
             </p>
@@ -205,6 +215,45 @@ export const Dashboard: React.FC = (): JSX.Element => {
                 />
               )}
             </Flex>
+          </Card>
+
+          {/* @ts-ignore */}
+          {/* row with two card */}
+          <Row gutter={16} style={{ marginBottom: "1.5rem" }}>
+            <Col span={12}>
+              <Card bordered={false}>
+                <Statistic
+                  title="Total Group"
+                  value={getTotalGroupFromResult(searchResult?.data) || 0}
+                  precision={0}
+                  prefix={<FolderOutlined />}
+                />
+              </Card>
+            </Col>
+            <Col span={12}>
+              <Card bordered={false}>
+                <Statistic
+                  title="Total Video"
+                  value={getTotalVideoFromResult(searchResult?.data) || 0}
+                  // suffix={`(${
+                  //   getMostKeyframeShown(searchResult?.data).length
+                  // } videos)`}
+                  precision={0}
+                  prefix={<YoutubeOutlined />}
+                />
+              </Card>
+            </Col>
+          </Row>
+          <Card bordered={false}>
+            <Statistic
+              title="Video have most keyframe"
+              value={getVideoHaveMostKeyframe(searchResult?.data).videoId || 0}
+              suffix={`(${
+                getVideoHaveMostKeyframe(searchResult?.data).maxKeyframe
+              } keyframes)`}
+              precision={0}
+              prefix={<FileImageOutlined />}
+            />
           </Card>
         </Col>
       </Row>
