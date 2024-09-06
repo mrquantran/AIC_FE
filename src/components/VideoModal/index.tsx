@@ -19,8 +19,6 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { Slider } from "antd";
-import { useSelector } from "react-redux";
-import { TAppRootReducer } from "@/store";
 
 interface IVideoModalProps {
   isModalVisible: boolean;
@@ -69,7 +67,10 @@ const VideoModal = ({
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
   const [duration, setDuration] = useState(0); // Track video duration
-  const [range, setRange] = useState<[number, number]>([0, 0]);
+  const [range, setRange] = useState<[number, number]>([
+    keyframeIndex / 25,
+    keyframeIndex / 25,
+  ]);
   const marks = useMemo(() => {
     return {
       0: "0s",
@@ -214,6 +215,11 @@ const VideoModal = ({
     }
   };
 
+  const handeGet100Frames = () => {
+    console.log("Get 100 frames");
+    setRange([range[0], range[0] + 4]);
+  };
+
   return (
     <Modal
       visible={isModalVisible}
@@ -221,7 +227,7 @@ const VideoModal = ({
       width="145vh"
       title={videoTitle}
       onCancel={handleVideoClose}
-      style={{ top: "5%", left: "auto", right: "auto", margin: "0 auto" }}
+      style={{ top: "1vh", left: "auto", right: "auto", margin: "0 auto" }}
     >
       <Flex vertical justify="center" align="center">
         <Flex width="100%" justify="center" align="center">
@@ -252,14 +258,26 @@ const VideoModal = ({
             </Flex>
           )}
         </Flex>
+
+        <Slider
+          style={{ width: "95%" }}
+          range={true}
+          marks={marks}
+          max={duration}
+          value={range}
+          tooltip={{
+            formatter: (value: number) => `${value * 25}`,
+          }}
+          onChange={onRangeChange}
+          draggableTrack
+        />
         <Row
           style={{
-            marginTop: "1rem",
             width: "100%",
           }}
           gutter={8}
         >
-          <Col span={4}>
+          <Col span={12}>
             <Space.Compact block>
               {/* <Button
                 onClick={() => handlePreviousKeyframe(1)}
@@ -294,22 +312,10 @@ const VideoModal = ({
               </Tooltip>
             </Space.Compact>
           </Col>
-          <Col span={13} align="start">
-            <Slider
-              range={true}
-              marks={marks}
-              max={duration}
-              value={range}
-              tooltip={{
-                formatter: (value: number) => `${value * 25}`,
-              }}
-              onChange={onRangeChange}
-              draggableTrack
-            />
-          </Col>
-          <Col span={7} align="end">
+          <Col span={12} align="end">
             <Space.Compact>
               {/* start range */}
+              <Button onClick={handeGet100Frames}>Get 100 Frames</Button>
               <Tooltip title={range[0] * 25} placement="bottomLeft">
                 <InputNumber
                   style={{ width: "8vh" }}
@@ -349,7 +355,9 @@ const VideoModal = ({
                   });
                 }}
                 icon={<CameraOutlined />}
-              ></Button>
+              >
+                Capture
+              </Button>
             </Space.Compact>
           </Col>
         </Row>
