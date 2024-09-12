@@ -216,11 +216,12 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     setIsModalVisible(false);
   };
 
-  const handleSaveHistory = (range: [number, number]) => {
+  const handleSaveHistory = (range: [number, number], answer?: string) => {
     const history: THistory = {
       range: range, // range of keyframes
       videoId: Number(videoId) || 0,
       groupId: Number(groupId) || 0,
+      answer: answer, // Add answer field to state
     };
 
     // // Validation: Check total columns and no duplicates

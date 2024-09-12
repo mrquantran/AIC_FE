@@ -34,3 +34,8 @@ export const addHistory = createAction(
 export const clearHistory = createAction(
   '@api/CLEAR_HISTORY'
 )()
+
+export const clearOneHistory = createAction(
+  '@api/CLEAR_ONE_HISTORY',
+  (index: number) => index
+)()

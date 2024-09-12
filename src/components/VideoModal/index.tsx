@@ -16,7 +16,9 @@ import {
   ForwardOutlined,
   BackwardOutlined,
   CameraOutlined,
+  CaretLeftOutlined,
   SaveOutlined,
+  CaretRightOutlined,
 } from "@ant-design/icons";
 import { Slider } from "antd";
 
@@ -35,7 +37,7 @@ interface IVideoModalProps {
     videoId: string;
     groupId: string;
   }) => void;
-  handleSaveHistory: ([start, end]: [number, number]) => void;
+  handleSaveHistory: ([start, end]: [number, number], answer?: string) => void;
 }
 
 const captureImageFromVideo = (video: HTMLVideoElement) => {
@@ -67,10 +69,18 @@ const VideoModal = ({
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
   const [duration, setDuration] = useState(0); // Track video duration
+  const [answer, setAnswer] = useState("");
   const [range, setRange] = useState<[number, number]>([
     keyframeIndex / 25,
     keyframeIndex / 25,
   ]);
+
+  useEffect(() => {
+    if (keyframeIndex !== 0) {
+      setRange([keyframeIndex / 25, keyframeIndex / 25]);
+    }
+  }, [keyframeIndex]);
+
   const marks = useMemo(() => {
     return {
       0: "0s",
@@ -211,7 +221,7 @@ const VideoModal = ({
 
   const handleSaveRange = () => {
     if (range[0] && range[1]) {
-      handleSaveHistory([range[0] * 25, range[1] * 25]);
+      handleSaveHistory([range[0] * 25, range[1] * 25], answer);
     }
   };
 
@@ -279,10 +289,10 @@ const VideoModal = ({
         >
           <Col span={12}>
             <Space.Compact block>
-              {/* <Button
+              <Button
                 onClick={() => handlePreviousKeyframe(1)}
                 icon={<CaretLeftOutlined />}
-              /> */}
+              />
               <Button
                 onClick={() => handlePreviousKeyframe(2)}
                 icon={<BackwardOutlined />}
@@ -294,10 +304,10 @@ const VideoModal = ({
                   onChange={handleKeyframeChange}
                 />
               </Tooltip>
-              {/* <Button
+              <Button
                 onClick={() => handleNextKeyframe(1)}
                 icon={<CaretRightOutlined />}
-              /> */}
+              />
               <Button
                 onClick={() => handleNextKeyframe(2)}
                 icon={<ForwardOutlined />}
@@ -335,7 +345,12 @@ const VideoModal = ({
                   formatter={(value: number) => `${value * 25 || 0}`}
                 />
               </Tooltip>
-              <Input style={{ width: "8vh" }} placeholder="Answer" />
+              <Input
+                style={{ width: "8vh" }}
+                placeholder="Answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.currentTarget.value)}
+              />
               <Button
                 type="primary"
                 icon={<SaveOutlined />}
@@ -346,7 +361,7 @@ const VideoModal = ({
               <Button
                 onClick={() => {
                   handleCaptureKeyframe({
-                    keyframe: range[0],
+                    keyframe: range[0] * 25,
                     image: videoRef.current
                       ? captureImageFromVideo(videoRef.current)
                       : null,

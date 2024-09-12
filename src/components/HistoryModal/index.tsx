@@ -1,16 +1,16 @@
-// @ts-nocheck
-import { THistory } from "@/store/reducers/app.reducers";
-import { Modal } from "antd";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Modal, Card, Row, Col, Button, Input, Select, Flex } from "antd";
 import {
   DragDropContext,
   Droppable,
   Draggable,
   DropResult,
 } from "react-beautiful-dnd";
-import { Card, Row, Col, Button } from "antd";
-import { useSelector } from "react-redux";
-
+import { TAppRootReducer } from "@/store";
+import { THistory } from "@/store/reducers/app.reducers";
+import { clearOneHistory } from "@/store/actions";
+import { ClearOutlined } from "@ant-design/icons";
 interface IVideoModalProps {
   isModalVisible: boolean;
   handleModalClose: () => void;
@@ -22,22 +22,26 @@ const HistoryModal = ({
   handleModalClose,
   title,
 }: IVideoModalProps) => {
-  const hisory = useSelector((state) => state.appState.history);
-  const [items, setItems] = useState(hisory);
+  const history = useSelector(
+    (state: TAppRootReducer) => state.appState.history
+  );
+  const [items, setItems] = useState(history);
+  const [queryNumber, setQueryNumber] = useState(1);
+  const [queryType, setQueryType] = useState("kis");
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (hisory.length > 0) {
-      setItems(hisory);
+    if (history.length > 0) {
+      setItems(history);
     }
-  }, [hisory]);
+  }, [history]);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
-    if (!destination) return; // Exit if there's no destination
+    if (!destination) return;
 
     if (source.droppableId === destination.droppableId) {
-      // Reordering within the same list
       const reorder = (
         list: THistory[],
         startIndex: number,
@@ -55,8 +59,8 @@ const HistoryModal = ({
 
   const renderItem = (item: THistory, index: number) => (
     <Draggable
-      key={`${item.groupId}-${item.videoId}-${index}`} // Ensure a unique key
-      draggableId={`item-${item.groupId}-${item.videoId}-${index}`} // Ensure unique draggableId
+      key={`${item.groupId}-${item.videoId}-${index}`}
+      draggableId={`item-${item.groupId}-${item.videoId}-${index}`}
       index={index}
     >
       {(provided) => (
@@ -66,10 +70,25 @@ const HistoryModal = ({
           {...provided.dragHandleProps}
         >
           <Card style={{ marginBottom: 16 }}>
-            <p>
-              Group {item.groupId} - Video: {item.videoId} - Range:{" "}
-              {item.range[0]} - {item.range[1]}
-            </p>
+            <Flex align="center" justify="space-between">
+              <p>
+                Group {item.groupId} - Video: {item.videoId} - Range:{" "}
+                {item.range[0]} - {item.range[1]}
+                {item.answer && (
+                  <span style={{ marginLeft: 16 }}>
+                    - Answer: {item.answer}
+                  </span>
+                )}
+              </p>
+              <Button
+                type="primary"
+                danger
+                onClick={() => removeHistoryItem(index)}
+                icon={<ClearOutlined />}
+              >
+                Remove
+              </Button>
+            </Flex>
           </Card>
         </div>
       )}
@@ -77,33 +96,40 @@ const HistoryModal = ({
   );
 
   const handleDownload = () => {
-    // Format the data into CSV without the header
     let csvContent = "";
 
     items.forEach((item) => {
       const { groupId, videoId, range } = item;
-      const videoFileName = `L${groupId}_V${videoId}.mp4`;
+      // convert groupId from 0 to 00, or 1 to 01, 10 to 10
+      const groupIdStr = groupId.toString().padStart(2, "0");
 
-      // Generate CSV lines for each frame index within the range
+      // convert video from 0 to 000, or 1 to 001, 10 to 010, 99 to 099, 100 to 100
+      const videoIdStr = videoId.toString().padStart(3, "0");
+
+      const videoFileName = `L${groupIdStr}_V${videoIdStr}`;
+
       for (let i = range[0]; i <= range[1]; i++) {
-        csvContent += `${videoFileName}, ${i}\n`;
+        if (item.answer !== "" && queryType === "qa") {
+          csvContent += `${videoFileName}, ${i}, ${item.answer}\n`;
+        } else {
+          csvContent += `${videoFileName}, ${i}\n`;
+        }
       }
     });
 
-    // Create a Blob from the CSV content
     const blob = new Blob([csvContent], { type: "text/csv" });
-    // Create a URL for the Blob
     const url = URL.createObjectURL(blob);
-    // Create a link element
     const link = document.createElement("a");
-    // Set the download attribute with a filename
-    link.download = "submitted.csv";
-    // Set the href to the Blob URL
+    link.download = `query-${queryNumber}-${queryType}.csv`;
     link.href = url;
-    // Programmatically click the link to trigger the download
     link.click();
-    // Clean up by revoking the Object URL
     URL.revokeObjectURL(url);
+  };
+
+  const removeHistoryItem = (index: number) => {
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
+    dispatch(clearOneHistory(index));
   };
 
   return (
@@ -124,8 +150,9 @@ const HistoryModal = ({
                   {...provided.droppableProps}
                   style={{
                     minHeight: 200,
-                    border: "1px dashed lightgray", // Ensure the area is visible
+                    border: "1px dashed lightgray",
                     padding: 8,
+                    marginBottom: 16,
                   }}
                 >
                   {items.map((item, index) => renderItem(item, index))}
@@ -133,13 +160,30 @@ const HistoryModal = ({
                 </div>
               )}
             </Droppable>
-            <Button
-              type="primary"
-              onClick={handleDownload}
-              style={{ marginTop: 16 }}
-            >
-              Download CSV
-            </Button>
+            <Row gutter={16} align="middle" style={{ width: " 100%" }}>
+              <Col span={16}>
+                <Input
+                  type="number"
+                  value={queryNumber}
+                  onChange={(e) => setQueryNumber(Number(e.target.value))}
+                  placeholder="Query Number"
+                  style={{ width: "8vh", marginRight: 8 }}
+                />
+                <Select
+                  value={queryType}
+                  onChange={(value) => setQueryType(value)}
+                  style={{ width: "10vh" }}
+                >
+                  <Select.Option value="kis">KIS</Select.Option>
+                  <Select.Option value="qa">QA</Select.Option>
+                </Select>
+              </Col>
+              <Col span={8} align="end">
+                <Button type="primary" onClick={handleDownload}>
+                  Download CSV
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </DragDropContext>

@@ -18,6 +18,7 @@ export type TAppState = {
 
 export interface THistory {
   range: [number, number];
+  answer?: string
   videoId: number;
   groupId: number;
 }
@@ -44,6 +45,12 @@ export default (
 ): TAppState => {
   switch (action.type) {
     // add new item to history
+    case getType(actions.clearOneHistory):
+      return update(state, {
+        history: {
+          $splice: [[action.payload, 1]],
+        },
+      });
     case getType(actions.clearHistory):
       return update(state, {
         history: {
