@@ -14,6 +14,7 @@ import {
   DeleteOutlined,
   FileTextOutlined,
   CodeSandboxOutlined,
+  AudioOutlined,
 } from "@ant-design/icons";
 import styled from "styled-components";
 import TextQuery from "@/container/TextQuery/TextQuery";
@@ -109,6 +110,12 @@ const BuidlingBar: Preact.FunctionComponent = () => {
         key: `tabAudio${key}`,
         tab: "Audio",
         content: <TextQuery tabKey={key} type="Audio" />,
+        icon: <AudioOutlined style={styleIcon} />,
+      },
+      {
+        key: `tabOCR${key}`,
+        tab: "OCR",
+        content: <TextQuery tabKey={key} type="OCR" />,
         icon: <FileTextOutlined style={styleIcon} />,
       },
     ];
@@ -183,8 +190,6 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   };
 
   const handleChangeSwitch = (tabKey: number) => {
-    // dispatch(setEnabledTabs(tabKey));
-    // dispatch(setDisabledTabs(tabKey));
     if (temporalSearchEnabled) {
       Toast("Cannot enable because of Temporal Search", "error");
       return;

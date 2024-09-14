@@ -9,7 +9,7 @@ const { TextArea } = Input;
 
 interface ITextQuery {
   tabKey: number;
-  type: "Text" | "Audio"
+  type: "Text" | "Audio" | "OCR"
 }
 
 const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey, type }) => {
