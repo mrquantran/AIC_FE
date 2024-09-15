@@ -21,7 +21,7 @@ import {
 } from "./ImageGallery.utils";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
-import { addHistory, setSelectedTemporalQuery } from "@/store/actions";
+import { addHistory } from "@/store/actions";
 import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
 import Toast from "../Toast";
 import { IImage, THistory } from "@/types";
@@ -31,22 +31,32 @@ export interface IImageGalleryProps {
   showConfidence?: boolean;
   top?: number;
   group: "all" | "video";
+  handleImageClick?: (
+    index: string,
+    value: string,
+    mode: "temporal" | "image" | "table"
+  ) => void;
 }
+
+const renderRank = (rank: number) => {
+  return <strong>{rank ? rank.toFixed(0) : "None"}</strong>;
+};
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
   top = 5,
   showConfidence = false,
   group = "video",
+  handleImageClick,
 }) => {
   const dispatch = useDispatch();
-  const mode = useSelector((state: TAppRootReducer) => state.appState.modeTab);
+
   const [groupId, setGroupId] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
-
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const mode = useSelector((state: TAppRootReducer) => state.appState.modeTab);
   const temporalSearchEnabled = useSelector(
     (state: TAppRootReducer) => state.appState.temporalSearchEnabled
   );
@@ -65,10 +75,17 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
       index?: number; // Add key field to state
     }[]
   >([]);
+
   const { data, refetch, isFetching, isSuccess } = useVideoStream(
     groupId,
     videoId
   );
+
+  const {
+    data: dataNearestIndex,
+    mutate: mutateNearestIndex,
+    isSuccess: isGetNearestIndexSuccess,
+  } = useSearchNearestIndexFromKeyframe();
 
   const isIncludeTemporalSearch = (value: string) => {
     return mode !== "temporal" && temporalSearch.includes(value)
@@ -122,10 +139,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     return `${group}/${video}/${index}`;
   };
 
-  const renderRank = (rank: number) => {
-    return <strong>{rank ? rank.toFixed(0) : "None"}</strong>;
-  };
-
   useEffect(() => {
     if (data) {
       const videoURL = URL.createObjectURL(data);
@@ -138,12 +151,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
       }
     };
   }, [data]);
-
-  const {
-    data: dataNearestIndex,
-    mutate: mutateNearestIndex,
-    isSuccess: isGetNearestIndexSuccess,
-  } = useSearchNearestIndexFromKeyframe();
 
   useEffect(() => {
     if (isGetNearestIndexSuccess && dataNearestIndex?.data) {
@@ -205,19 +212,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     }
   };
 
-  const handleImageClick = (index: string, value: string) => {
-    const imageSplitted = value.split("/");
-    let group = imageSplitted[0];
-    let video = imageSplitted[1];
-
-    const temporalQuery = `${group}/${video}/${index}`;
-
-    if (!temporalSearchEnabled || mode === "temporal") {
-      return;
-    }
-    dispatch(setSelectedTemporalQuery(temporalQuery));
-  };
-
   const handleModalClose = () => {
     setIsModalVisible(false);
   };
@@ -239,6 +233,8 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
 
     Toast("Please select a question first", "error");
   };
+
+  const isPreviewEnabled = !(temporalSearchEnabled && mode !== "temporal");
 
   return (
     <>
@@ -312,14 +308,17 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                   : ""
                               }`}
                               onClick={() =>
-                                handleImageClick(keyframe.key, keyframe.value)
+                                handleImageClick &&
+                                handleImageClick(
+                                  keyframe.key,
+                                  keyframe.value,
+                                  mode
+                                )
                               }
                             >
                               {/* @ts-ignore */}
                               <Image
-                                preview={
-                                  !temporalSearchEnabled || mode === "temporal"
-                                }
+                                preview={isPreviewEnabled}
                                 src={formatImagePath(keyframe.value)}
                               />
                             </div>
@@ -365,20 +364,18 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                   `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
                                 )}`}
                                 onClick={() =>
+                                  handleImageClick &&
                                   handleImageClick(
-                                    keyframe?.index?.toString() || "",
-                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe.keyframe}`
+                                    keyframe?.index?.toString() ?? "",
+                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe.keyframe}`,
+                                    mode
                                   )
                                 }
                               >
                                 {/* @ts-ignore */}
                                 <Image
-                                  preview={
-                                    temporalSearchEnabled && mode !== "temporal"
-                                      ? false
-                                      : true
-                                  }
-                                  src={formatImagePath(keyframe.image || "")}
+                                  preview={isPreviewEnabled}
+                                  src={formatImagePath(keyframe.image ?? "")}
                                 />
                               </div>
                               <Flex justify="center" align="center">

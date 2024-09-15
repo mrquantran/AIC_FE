@@ -23,7 +23,11 @@ import {
 } from "@ant-design/icons";
 import type { TreeDataNode } from "antd";
 import { mapSearchResultsToTree } from "./Dashboard.utils";
-import { setClearTemporalSearch, setModeTab } from "@/store/actions";
+import {
+  setClearTemporalSearch,
+  setModeTab,
+  setSelectedTemporalQuery,
+} from "@/store/actions";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
@@ -31,6 +35,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
   );
   const [selectTop, setSelectTop] = useState<number>(24);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
+
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
@@ -102,6 +107,21 @@ export const Dashboard: React.FC = (): JSX.Element => {
       videoId,
       maxKeyframe,
     };
+  };
+
+  const handleImageClick = (
+    index: string,
+    value: string,
+    mode: "temporal" | "image" | "table"
+  ) => {
+    const imageSplitted = value.split("/");
+    let group = imageSplitted[0];
+    let video = imageSplitted[1];
+    const temporalQuery = `${group}/${video}/${index}`;
+    if (!temporalSearchEnabled || mode === "temporal") {
+      return;
+    }
+    dispatch(setSelectedTemporalQuery(temporalQuery));
   };
 
   return (
@@ -200,7 +220,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
           <Card bordered={false}>
             <Statistic
               title="Video have most keyframe"
-              value={getVideoHaveMostKeyframe(searchResult?.data).videoId || 0}
+              value={getVideoHaveMostKeyframe(searchResult?.data).videoId ?? 0}
               suffix={`(${
                 getVideoHaveMostKeyframe(searchResult?.data).maxKeyframe
               } keyframes)`}
@@ -228,11 +248,16 @@ export const Dashboard: React.FC = (): JSX.Element => {
         }
       >
         {modeTab === "image" && (
-          <ImageGallery group={groupFromat} images={searchResult?.data} />
+          <ImageGallery
+            handleImageClick={handleImageClick}
+            group={groupFromat}
+            images={searchResult?.data}
+          />
         )}
         {/* {modeTab === "table" && <Table data={searchResult?.data} />} */}
         {modeTab === "temporal" && (
           <ImageGallery
+            handleImageClick={handleImageClick}
             group={groupFromat}
             images={temporalSearchResult?.data}
           />

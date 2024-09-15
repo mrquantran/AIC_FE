@@ -85,7 +85,7 @@ export default (
       const found = state.history.questions.find(
         (q) => q.fileName === action.payload.selectedQuestion.fileName
       );
-      console.log('found', found)
+      console.log("found", found);
       if (found) {
         return update(state, {
           history: {

@@ -48,7 +48,7 @@ export const setQuestions = createAction(
 )();
 
 export const setSelectedQuestion = createAction(
-  "@v/SET_SELECTED_QUESTION",
+  "@api/SET_SELECTED_QUESTION",
   (question: TQuestion) => question
 )();
 

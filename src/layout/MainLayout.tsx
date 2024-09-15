@@ -144,6 +144,7 @@ const MainLayout: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // MainLayout.tsx:148 Warning: [Ant Design CSS-in-JS] You are registering a cleanup function after unmount, which will not have any effect.
   const handleSideBarClick = ({ key }: { key: string }) => {
     if (key) {
       navigate(key);
@@ -332,7 +333,7 @@ const MainLayout: React.FC = () => {
           </Button>
           <Button
             type="primary"
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             style={{ marginRight: "1rem" }}
             icon={<ScanOutlined />}
           >
