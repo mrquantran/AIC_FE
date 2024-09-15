@@ -56,3 +56,10 @@ export type TOptionSelect = {
   value: string;
   [key: string]: string;
 };
+
+export type TQuestion = {
+  fileName: string;
+  type: "qa" | "kis";
+  number: number;
+  content: string;
+};

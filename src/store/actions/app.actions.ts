@@ -1,5 +1,6 @@
 import { createAction } from 'typesafe-actions'
 import { TAppState } from '../reducers/app.reducers'
+import { TQuestion } from '@/types'
 
 export const setAppError = createAction(
   '@api/SET_APP_FAILURE',
@@ -39,3 +40,17 @@ export const clearOneHistory = createAction(
   '@api/CLEAR_ONE_HISTORY',
   (index: number) => index
 )()
+
+export const setQuestions = createAction(
+  "@api/SET_QUESTIONS",
+  (questions: TQuestion[]) => questions
+)();
+
+export const setSelectedQuestion = createAction(
+  "@v/SET_SELECTED_QUESTION",
+  (question: TQuestion) => question
+)();
+
+export const clearSearchHistory = createAction(
+  "@v/CLEAR_SEARCH_HISTORY"
+)();

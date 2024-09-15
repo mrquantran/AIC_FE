@@ -1,6 +1,13 @@
+import { TQuestion } from "@/types";
 import * as actions from "@store/actions/app.actions";
 import update from "immutability-helper";
 import { ActionType, getType } from "typesafe-actions";
+import { TSearch } from "./search.reducers";
+
+export type TSave = {
+  query: TSearch[];
+  result: any;
+};
 
 export type TAppState = {
   apiError: string;
@@ -14,11 +21,16 @@ export type TAppState = {
   objectNames: string[];
   modeTab: "image" | "table" | "temporal";
   history: THistory[];
+  searchHistory: {
+    saved: TSave[];
+    selectedQuestion: TQuestion | null;
+    questions: TQuestion[];
+  };
 };
 
 export interface THistory {
   range: [number, number];
-  answer?: string
+  answer?: string;
   videoId: number;
   groupId: number;
 }
@@ -35,6 +47,11 @@ const initialAppState: TAppState = {
   objectNames: [],
   modeTab: "image",
   history: [],
+  searchHistory: {
+    questions: [],
+    selectedQuestion: null,
+    saved: [],
+  },
 };
 
 export type TAppActionType = ActionType<typeof actions>;
@@ -44,7 +61,29 @@ export default (
   action: TAppActionType
 ): TAppState => {
   switch (action.type) {
-    // add new item to history
+    case getType(actions.setQuestions):
+      return update(state, {
+        searchHistory: {
+          questions: { $set: action.payload },
+        },
+      });
+    case getType(actions.clearSearchHistory):
+      return update(state, {
+        searchHistory: {
+          saved: { $set: [] },
+          selectedQuestion: { $set: null },
+          questions: {
+            $set: []
+          }
+        },
+      });
+    case getType(actions.setSelectedQuestion):
+      return update(state, {
+        searchHistory: {
+          selectedQuestion: { $set: action.payload },
+        },
+      });
+      
     case getType(actions.clearOneHistory):
       return update(state, {
         history: {
@@ -66,14 +105,14 @@ export default (
     case getType(actions.setTemporalSearchEnabled):
       return update(state, {
         temporalSearchEnabled: {
-          $set: action.payload
-        }
+          $set: action.payload,
+        },
       });
     case getType(actions.setModeTab):
       return update(state, {
         modeTab: {
-          $set: action.payload
-        }
+          $set: action.payload,
+        },
       });
     case getType(actions.setAppError):
       return update(state, {

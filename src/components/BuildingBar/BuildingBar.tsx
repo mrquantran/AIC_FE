@@ -1,14 +1,5 @@
 import Preact, { JSX, ReactNode, useEffect } from "preact/compat";
-import {
-  Alert,
-  Button,
-  Card,
-  Flex,
-  Layout,
-  Row,
-  Switch,
-  Tabs,
-} from "antd";
+import { Alert, Button, Card, Flex, Layout, Row, Switch, Tabs } from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,

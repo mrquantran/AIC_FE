@@ -179,14 +179,9 @@ const VideoModal = ({
     }
   };
 
-  const handeGet100Frames = () => {
-    console.log("Get 100 frames");
-    setRange([range[0], range[0] + 4]);
-  };
-
   return (
     <Modal
-      visible={isModalVisible}
+      open={isModalVisible}
       footer={null}
       width="150vh"
       title={videoTitle}
@@ -194,6 +189,7 @@ const VideoModal = ({
       style={{ top: "5vh", left: "auto", right: "auto", margin: "0 auto" }}
     >
       <Flex vertical justify="center" align="center">
+        {/* @ts-ignore */}
         <Flex width="100%" justify="center" align="center">
           <video
             ref={videoRef}
@@ -203,6 +199,7 @@ const VideoModal = ({
               aspectRatio: "16 / 9",
             }}
           >
+            <track kind="captions" />
             {videoSrc && <source src={videoSrc} type="video/mp4" />}
           </video>
           {isFetching && (
@@ -265,12 +262,13 @@ const VideoModal = ({
               </Tooltip>
             </Space.Compact>
           </Col>
+          {/* @ts-ignore */}
           <Col span={12} align="end">
             <Space.Compact>
               {/* start range */}
               {/* <Button onClick={handeGet100Frames}>Get 100 Frames</Button> */}
               <Select
-                defaultValue="100"
+                defaultValue={100}
                 style={{ width: "8vh" }}
                 onChange={(value: number) => setGetnFrames(value)}
               >

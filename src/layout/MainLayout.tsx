@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "preact/compat";
-import { Button, Layout, Space, theme } from "antd";
+import { Button, Layout, Select, Space, theme } from "antd";
 import viteLogo from "/vite.svg";
 import styled from "styled-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import "./MainLayout.scss";
 import { useRoutes } from "@/hooks";
-import { TSideBarItem } from "@/types";
+import { TQuestion, TSideBarItem } from "@/types";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { RootPaths } from "@/constants";
 import BuidlingBar from "@/components/BuildingBar/BuildingBar";
@@ -24,11 +24,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchKeyframes } from "@/api/hooks/search";
 import {
   clearHistory,
+  clearSearchHistory,
   clearSearchQuery,
   setDisabledTabs,
   setEnabledTabs,
   setModeTab,
+  setQuestions,
   setSearchResult,
+  setSelectedQuestion,
   setTemporalSearchEnabled,
   setTemporalSearchResult,
   submitSearchQuery,
@@ -38,7 +41,7 @@ import Toast from "@/components/Toast";
 import { TAppRootReducer } from "@/store";
 import SettingSearch from "@/container/Settings";
 import Loading from "@/components/Loading";
-import HistoryModal from "@/components/HistoryModal";
+import HistoryUploadModal from "@/components/HistoryUpload";
 import Swal from "sweetalert2";
 import { convertToSearchBodyTemporal } from "./MainLayout.utils";
 
@@ -78,6 +81,12 @@ const MainLayout: React.FC = () => {
   );
   const disabledTabs = useSelector(
     (state: TAppRootReducer) => state.searchState.disabledTabs
+  );
+  const questions = useSelector(
+    (state: TAppRootReducer) => state.appState.searchHistory.questions
+  );
+  const currentSelectedQuestion = useSelector(
+    (state: TAppRootReducer) => state.appState.searchHistory.selectedQuestion
   );
 
   const [open, setOpen] = useState(false);
@@ -210,6 +219,7 @@ const MainLayout: React.FC = () => {
         dispatch(setTemporalSearchEnabled(false));
         dispatch(setModeTab("image"));
         dispatch(clearHistory());
+        dispatch(clearSearchHistory());
         Toast("Search queries cleared", "success");
       }
     });
@@ -217,7 +227,7 @@ const MainLayout: React.FC = () => {
 
   const handleClickTryButton = () => {
     Toast("Prepare new query", "success", "top-start");
-    dispatch(trySearchQuery());
+    dispatch(trySearchQuery(currentSelectedQuestion?.content || ""));
   };
 
   const handleTemporalEnabled = () => {
@@ -244,12 +254,19 @@ const MainLayout: React.FC = () => {
     dispatch(setTemporalSearchEnabled(!temporalSearchEnabled));
   };
 
+  const handleSubmitQuestions = (data: TQuestion[]) => {
+    dispatch(setQuestions(data));
+    setHistoryVisible(false);
+    Toast("History uploaded", "success");
+  };
+
   return (
     <StyledLayout>
-      <HistoryModal
+      <HistoryUploadModal
         title="History Search"
         handleModalClose={() => setHistoryVisible(false)}
         isModalVisible={historyVisible}
+        handleSubmit={handleSubmitQuestions}
       />
       {isPending ? <Loading /> : null}
       <StyledHeader background={colorBgContainer}>
@@ -258,14 +275,6 @@ const MainLayout: React.FC = () => {
           <h2 className="title-header">AI Challenge 2024</h2>
         </StyledFlex>
         <StyledFlex>
-          <Button
-            type="default"
-            onClick={handleClickTryButton}
-            style={{ marginRight: "1rem" }}
-            icon={<BulbOutlined />}
-          >
-            Test it
-          </Button>
           <Button
             onClick={handleTemporalEnabled}
             style={{ marginRight: "1rem" }}
@@ -281,6 +290,37 @@ const MainLayout: React.FC = () => {
             onClick={showModalHistory}
           >
             History
+          </Button>
+          <Select
+            placeholder="Select a question"
+            style={{ width: "100%", marginRight: "1rem" }}
+            value={currentSelectedQuestion?.fileName}
+            onChange={(value: string) => {
+              const question = questions.find((q) => q.fileName === value);
+              if (!question) {
+                Toast("Question not found", "error");
+                return;
+              }
+              dispatch(setSelectedQuestion(question));
+            }}
+          >
+            {questions.map((question) => (
+              <Select.Option
+                key={question.fileName}
+                value={question.fileName}
+                o
+              >
+                {question.fileName}
+              </Select.Option>
+            ))}
+          </Select>
+          <Button
+            type="default"
+            onClick={handleClickTryButton}
+            style={{ marginRight: "1rem" }}
+            icon={<BulbOutlined />}
+          >
+            Test it
           </Button>
           <Button
             type="dashed"

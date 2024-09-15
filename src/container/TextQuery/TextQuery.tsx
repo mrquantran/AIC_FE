@@ -9,7 +9,7 @@ const { TextArea } = Input;
 
 interface ITextQuery {
   tabKey: number;
-  type: "Text" | "Audio" | "OCR"
+  type: "Text" | "Audio" | "OCR";
 }
 
 const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey, type }) => {
@@ -22,7 +22,9 @@ const TextQuery: Preact.FunctionComponent<ITextQuery> = ({ tabKey, type }) => {
   );
 
   // Local state to manage the input value
-  const [inputValue, setInputValue] = useState(searchTab?.value ?? "");
+  const [inputValue, setInputValue] = useState(
+    searchTab?.value ?? ""
+  );
 
   useEffect(() => {
     dispatch(setSearchTerm(type, inputValue, tabKey));

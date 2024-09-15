@@ -7,7 +7,7 @@ import persistReducer from 'redux-persist/es/persistReducer';
 const appPersistSettingConfig = {
   key: "appState",
   storage: storage,
-  whitelist: ["settings", "objectNames", "history"],
+  whitelist: ["settings", "objectNames", "history", "searchHistory"],
   blacklist: [],
 };
 

@@ -1,6 +1,7 @@
 // src/store/actions/search.actions.ts
 import { createAction } from "typesafe-actions";
 import { TModelSearch } from "@/types/apis/search";
+import { TQuestion } from "@/types";
 
 export const setSearchTerm = createAction(
   "@search/SET_SEARCH_TERM",
@@ -15,7 +16,10 @@ export const submitSearchQuery = createAction("@search/SUBMIT_SEARCH_QUERY")();
 
 export const clearSearchQuery = createAction("@search/CLEAR_SEARCH_QUERY")();
 
-export const trySearchQuery = createAction("@search/TRY_SEARCH_QUERY")();
+export const trySearchQuery = createAction(
+  "@search/TRY_SEARCH_QUERY",
+  (content: string) => content
+)();
 
 export const setTemporalSearchResult = createAction(
   "@search/SET_TEMPORAL_SEARCH_RESULT",
