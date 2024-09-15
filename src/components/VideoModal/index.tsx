@@ -10,6 +10,7 @@ import {
   InputNumber,
   Row,
   Col,
+  Select,
 } from "antd";
 import {
   ClockCircleOutlined,
@@ -69,6 +70,7 @@ const VideoModal = ({
   const [currentKeyframe, setCurrentKeyframe] = useState(keyframeIndex);
   const [currentSecond, setCurrentSecond] = useState(0); // Track current time in seconds
   const [duration, setDuration] = useState(0); // Track video duration
+  const [getnFrames, setGetnFrames] = useState(100);
   const [answer, setAnswer] = useState("");
   const [range, setRange] = useState<[number, number]>([
     keyframeIndex / 25,
@@ -81,18 +83,6 @@ const VideoModal = ({
     }
   }, [keyframeIndex]);
 
-  const marks = useMemo(() => {
-    return {
-      0: "0s",
-      [duration]: `${duration.toFixed(0)}s`,
-      [keyframeIndex / 25]: {
-        style: {
-          color: "#52C41A",
-        },
-        label: `${(keyframeIndex / 25).toFixed(0)}s`,
-      },
-    };
-  }, [duration]);
   // Handle keyframe changes to set the video currentTime properly
   useEffect(() => {
     if (videoRef.current && isModalVisible) {
@@ -169,8 +159,6 @@ const VideoModal = ({
   };
 
   const handleKeyframeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // fix Property 'value' does not exist on type 'EventTarget'.
-    // const newKeyframe = parseInt(e.target.value, 10);
     const newKeyframe = parseInt(e.currentTarget.value, 10);
     if (!isNaN(newKeyframe) && newKeyframe >= 0 && videoRef.current) {
       const newTime = newKeyframe / 25;
@@ -183,40 +171,6 @@ const VideoModal = ({
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-  };
-
-  const onRangeChange = (value: [number, number]) => {
-    if (videoRef.current) {
-      if (value[0] !== range[0]) {
-        videoRef.current.currentTime = value[0];
-        setCurrentKeyframe(Math.floor(value[0] * 25));
-      }
-
-      if (value[1] !== range[1]) {
-        videoRef.current.currentTime = value[1];
-        setCurrentKeyframe(Math.floor(value[1] * 25));
-      }
-
-      setRange(value);
-    }
-  };
-
-  const handleChangeInput = (index: number, value: number) => {
-    if (videoRef.current) {
-      const newRange: [number, number] = [...range];
-      newRange[index] = value;
-      setRange(newRange);
-
-      if (index === 0) {
-        videoRef.current.currentTime = value;
-        setCurrentKeyframe(Math.floor(value * 25));
-      }
-
-      if (index === 1) {
-        videoRef.current.currentTime = value;
-        setCurrentKeyframe(Math.floor(value * 25));
-      }
-    }
   };
 
   const handleSaveRange = () => {
@@ -234,10 +188,10 @@ const VideoModal = ({
     <Modal
       visible={isModalVisible}
       footer={null}
-      width="145vh"
+      width="150vh"
       title={videoTitle}
       onCancel={handleVideoClose}
-      style={{ top: "1vh", left: "auto", right: "auto", margin: "0 auto" }}
+      style={{ top: "5vh", left: "auto", right: "auto", margin: "0 auto" }}
     >
       <Flex vertical justify="center" align="center">
         <Flex width="100%" justify="center" align="center">
@@ -268,35 +222,24 @@ const VideoModal = ({
             </Flex>
           )}
         </Flex>
-
-        <Slider
-          style={{ width: "95%" }}
-          range={true}
-          marks={marks}
-          max={duration}
-          value={range}
-          tooltip={{
-            formatter: (value: number) => `${value * 25}`,
-          }}
-          onChange={onRangeChange}
-          draggableTrack
-        />
         <Row
           style={{
             width: "100%",
+            marginTop: "1rem",
           }}
           gutter={8}
         >
           <Col span={12}>
             <Space.Compact block>
               <Button
-                onClick={() => handlePreviousKeyframe(1)}
-                icon={<CaretLeftOutlined />}
-              />
-              <Button
                 onClick={() => handlePreviousKeyframe(2)}
                 icon={<BackwardOutlined />}
               />
+              <Button
+                onClick={() => handlePreviousKeyframe(1)}
+                icon={<CaretLeftOutlined />}
+              />
+
               <Tooltip title="Keyframe Index" placement="bottom">
                 <Input
                   style={{ width: "6rem" }}
@@ -325,24 +268,32 @@ const VideoModal = ({
           <Col span={12} align="end">
             <Space.Compact>
               {/* start range */}
-              <Button onClick={handeGet100Frames}>Get 100 Frames</Button>
+              {/* <Button onClick={handeGet100Frames}>Get 100 Frames</Button> */}
+              <Select
+                defaultValue="100"
+                style={{ width: "8vh" }}
+                onChange={(value: number) => setGetnFrames(value)}
+              >
+                <Select.Option value={10}>10</Select.Option>
+                <Select.Option value={25}>25</Select.Option>
+                <Select.Option value={50}>50</Select.Option>
+                <Select.Option value={100}>100</Select.Option>
+              </Select>
               <Tooltip title={range[0] * 25} placement="bottomLeft">
                 <InputNumber
                   style={{ width: "8vh" }}
-                  value={range[0]}
+                  value={currentKeyframe}
                   defaultValue={0}
-                  onChange={(value: number) => handleChangeInput(0, value)}
-                  formatter={(value: number) => `${value * 25 || 0}`}
+                  readOnly
                 />
               </Tooltip>
               {/* end range */}
               <Tooltip title={range[1] * 25} placement="bottomLeft">
                 <InputNumber
                   style={{ width: "8vh" }}
-                  value={range[1]}
+                  value={currentKeyframe + getnFrames}
                   defaultValue={0}
-                  onChange={(value: number) => handleChangeInput(1, value)}
-                  formatter={(value: number) => `${value * 25 || 0}`}
+                  readOnly
                 />
               </Tooltip>
               <Input
