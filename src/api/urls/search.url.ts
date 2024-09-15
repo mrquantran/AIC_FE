@@ -19,4 +19,8 @@ export const REST_API_QUERY = {
     uri: "/api/v1/query/index/nearest",
     method: "GET",
   },
+  SEARCH_KEYFRAMES_BY_RANGE: {
+    uri: "/api/v1/query/index/range",
+    method: "POST",
+  },
 };

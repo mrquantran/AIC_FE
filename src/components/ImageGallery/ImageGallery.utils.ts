@@ -1,5 +1,5 @@
 import { appConfig } from "@/config/appConfig";
-import { IImage } from "./ImageGallery.d";
+import { IImage } from "@/types";
 
 export const handle_image_by_group = (images: IImage[]) => {
   const result: Array<{

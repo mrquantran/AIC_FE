@@ -5,12 +5,13 @@ import { flatten } from "./utils";
 import { CustomNavigate } from "./components";
 import { withCustomErrorBoundary } from "./HOC";
 import { DashboardRoutes } from "@pages/Dashboard";
+import { HistoryPageRoutes } from "./pages/HistoryPage/HistoryPage.route";
 
 export const MainLayoutRoutes: TRoute = {
   component: MainLayout,
   path: "/",
   page: "accessible",
-  children: [...DashboardRoutes],
+  children: [...DashboardRoutes, ...HistoryPageRoutes],
 };
 
 export const routes: TRoute[] = [MainLayoutRoutes];

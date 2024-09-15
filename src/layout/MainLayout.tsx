@@ -14,7 +14,7 @@ import {
   SettingOutlined,
   BulbOutlined,
   ClearOutlined,
-  HistoryOutlined,
+  UploadOutlined,
   ScanOutlined,
   SelectOutlined,
 } from "@ant-design/icons";
@@ -83,10 +83,10 @@ const MainLayout: React.FC = () => {
     (state: TAppRootReducer) => state.searchState.disabledTabs
   );
   const questions = useSelector(
-    (state: TAppRootReducer) => state.appState.searchHistory.questions
+    (state: TAppRootReducer) => state.appState.history.questions
   );
   const currentSelectedQuestion = useSelector(
-    (state: TAppRootReducer) => state.appState.searchHistory.selectedQuestion
+    (state: TAppRootReducer) => state.appState.history.selectedQuestion
   );
 
   const [open, setOpen] = useState(false);
@@ -286,10 +286,10 @@ const MainLayout: React.FC = () => {
           <Button
             type="default"
             style={{ marginRight: "1rem" }}
-            icon={<HistoryOutlined />}
+            icon={<UploadOutlined />}
             onClick={showModalHistory}
           >
-            History
+            Upload Test
           </Button>
           <Select
             placeholder="Select a question"
@@ -304,7 +304,7 @@ const MainLayout: React.FC = () => {
               dispatch(setSelectedQuestion(question));
             }}
           >
-            {questions.map((question) => (
+            {questions?.map((question) => (
               <Select.Option
                 key={question.fileName}
                 value={question.fileName}
@@ -351,7 +351,7 @@ const MainLayout: React.FC = () => {
           onPathChange={handleSideBarClick}
         />
         <Layout>
-          <BuidlingBar />
+          {location.pathname === "/dashboard" ? <BuidlingBar /> : null}
           <StyledLayout padding={true} style={{ overflow: "auto" }}>
             <Layout.Content>
               <Outlet />

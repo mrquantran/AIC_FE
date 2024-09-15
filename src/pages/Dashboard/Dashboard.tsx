@@ -31,7 +31,6 @@ export const Dashboard: React.FC = (): JSX.Element => {
   );
   const [selectTop, setSelectTop] = useState<number>(24);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
-  // const [groupSort, setGroupSort] = useState<"keyframe" | "score">("score");
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );

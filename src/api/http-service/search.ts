@@ -2,6 +2,7 @@ import { REST_API } from "@/config";
 import { HttpService } from "./http-service";
 import {
   TSearchKeyframePayload,
+  TSearchKeyframesByRangePayload,
   TSearchNearestIndexFromKeyframePayload,
   TSearchParams,
 } from "@/types/apis/search";
@@ -34,4 +35,11 @@ export const getNearestIndexFromKeyframe = async (
     url,
     payload
   );
+};
+
+export const searchKeyframesByRange = async (
+  payload: TSearchKeyframesByRangePayload[],
+): Promise<any> => {
+  const url = `${REST_API.SEARCH_KEYFRAMES_BY_RANGE.uri}`;
+  return HttpService.post<TSearchKeyframesByRangePayload[], any>(url, payload);
 };

@@ -2,12 +2,8 @@ import { TQuestion } from "@/types";
 import * as actions from "@store/actions/app.actions";
 import update from "immutability-helper";
 import { ActionType, getType } from "typesafe-actions";
-import { TSearch } from "./search.reducers";
 
-export type TSave = {
-  query: TSearch[];
-  result: any;
-};
+// extends type from TQuestion
 
 export type TAppState = {
   apiError: string;
@@ -20,20 +16,11 @@ export type TAppState = {
   temporalSearchEnabled: boolean;
   objectNames: string[];
   modeTab: "image" | "table" | "temporal";
-  history: THistory[];
-  searchHistory: {
-    saved: TSave[];
+  history: {
     selectedQuestion: TQuestion | null;
     questions: TQuestion[];
   };
 };
-
-export interface THistory {
-  range: [number, number];
-  answer?: string;
-  videoId: number;
-  groupId: number;
-}
 
 const initialAppState: TAppState = {
   apiError: "",
@@ -46,11 +33,9 @@ const initialAppState: TAppState = {
   temporalSearchEnabled: false,
   objectNames: [],
   modeTab: "image",
-  history: [],
-  searchHistory: {
+  history: {
     questions: [],
     selectedQuestion: null,
-    saved: [],
   },
 };
 
@@ -63,45 +48,60 @@ export default (
   switch (action.type) {
     case getType(actions.setQuestions):
       return update(state, {
-        searchHistory: {
+        history: {
           questions: { $set: action.payload },
         },
       });
     case getType(actions.clearSearchHistory):
       return update(state, {
-        searchHistory: {
-          saved: { $set: [] },
+        history: {
           selectedQuestion: { $set: null },
           questions: {
-            $set: []
-          }
+            $set: [],
+          },
         },
       });
     case getType(actions.setSelectedQuestion):
       return update(state, {
-        searchHistory: {
+        history: {
           selectedQuestion: { $set: action.payload },
         },
       });
-      
-    case getType(actions.clearOneHistory):
-      return update(state, {
-        history: {
-          $splice: [[action.payload, 1]],
-        },
-      });
-    case getType(actions.clearHistory):
-      return update(state, {
-        history: {
-          $set: [],
-        },
-      });
+    // case getType(actions.clearOneHistory):
+    //   return update(state, {
+    //     history: {
+    //       $splice: [[action.payload, 1]],
+    //     },
+    //   });
+    // case getType(actions.clearHistory):
+    //   return update(state, {
+    //     history: {
+    //       $set: [],
+    //     },
+    //   });
     case getType(actions.addHistory):
-      return update(state, {
-        history: {
-          $unshift: [action.payload],
-        },
-      });
+      // find questions with the same filename with action.payload.selectedQuestion
+      // Unexpected lexical declaration in case block
+      const found = state.history.questions.find(
+        (q) => q.fileName === action.payload.selectedQuestion.fileName
+      );
+      console.log('found', found)
+      if (found) {
+        return update(state, {
+          history: {
+            questions: {
+              [state.history.questions.indexOf(found)]: {
+                history: {
+                  $push: [action.payload.history],
+                },
+              },
+            },
+          },
+        });
+      }
+
+      return state;
+
     case getType(actions.setTemporalSearchEnabled):
       return update(state, {
         temporalSearchEnabled: {

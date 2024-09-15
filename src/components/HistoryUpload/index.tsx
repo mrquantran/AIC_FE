@@ -64,7 +64,7 @@ const HistoryUploadModal: React.FC<IVideoModalProps> = ({
         if (event.target) {
           const content = event.target?.result as string;
           const type = file.name.includes("qa") ? "qa" : "kis";
-          const number = parseInt(file.name.match(/\d+/)?.[0] || "0", 10);
+          const number = parseInt(RegExp(/\d+/).exec(file.name)?.[0] ?? "0", 10);
           setFileContents((prev) => [
             ...prev,
             {
@@ -72,6 +72,7 @@ const HistoryUploadModal: React.FC<IVideoModalProps> = ({
               type,
               number,
               content,
+              history: [],
             },
           ]);
           setUploadCount((prev) => prev + 1);

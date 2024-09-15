@@ -14,7 +14,6 @@ import "./ImageGallery.scss"; // Import the CSS file
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
 import VideoModal from "../VideoModal";
-import { IImageGalleryProps } from "./ImageGallery.d";
 import {
   formatImagePath,
   handle_image_by_group,
@@ -25,7 +24,14 @@ import { TAppRootReducer } from "@/store";
 import { addHistory, setSelectedTemporalQuery } from "@/store/actions";
 import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
 import Toast from "../Toast";
-import { THistory } from "@/store/reducers/app.reducers";
+import { IImage, THistory } from "@/types";
+
+export interface IImageGalleryProps {
+  images: IImage[];
+  showConfidence?: boolean;
+  top?: number;
+  group: "all" | "video";
+}
 
 const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   images,
@@ -47,8 +53,8 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   const temporalSearch = useSelector(
     (state: TAppRootReducer) => state.searchState.temporalSearch
   );
-  const historyState = useSelector(
-    (state: TAppRootReducer) => state.appState.history
+  const currentSelectedQuestion = useSelector(
+    (state: TAppRootReducer) => state.appState.history.selectedQuestion
   );
   const [captureKeyframe, setCaptureKeyframe] = useState<
     {
@@ -142,7 +148,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   useEffect(() => {
     if (isGetNearestIndexSuccess && dataNearestIndex?.data) {
       const { video_id, group_id, frame_id, index, value } =
-        dataNearestIndex?.data;
+        dataNearestIndex.data;
 
       setCaptureKeyframe((prev) => [
         ...prev,
@@ -183,7 +189,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
     groupIdClicked: string,
     keyframeClicked: string
   ) => {
-    const keyframeIndex = parseInt(keyframeClicked.split("/").pop() || "0", 10);
+    const keyframeIndex = parseInt(keyframeClicked.split("/").pop() ?? "0", 10);
 
     if (videoId === videoIdClicked && groupId === groupIdClicked) {
       // Only update the keyframeIndex and open the modal
@@ -224,41 +230,14 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
       answer: answer, // Add answer field to state
     };
 
-    // // Validation: Check total columns and no duplicates
-    // const totalFrames = historyState.reduce((sum, item) => {
-    //   return sum + (item.range[1] - item.range[0] + 1); // Calculate total frames from each range
-    // }, 0);
+    if (currentSelectedQuestion) {
+      // If validation passes, dispatch the action to add history
+      dispatch(addHistory(history, currentSelectedQuestion));
+      Toast("Save History", "success");
+      return;
+    }
 
-    // // Add the new history range frames to the total
-    // const newRangeFrames = range[1] - range[0] + 1;
-    // if (totalFrames + newRangeFrames > 100) {
-    //   Toast("Total frame count exceeds 100, unable to save.", "error");
-    //   return; // Exit if the total exceeds 100
-    // }
-
-    // // Check for duplicates
-    // const isDuplicate = historyState.some(
-    //   (item) =>
-    //     (item.videoId === history.videoId &&
-    //       item.groupId === history.groupId &&
-    //       //  check range is item not overlap with any range in history
-    //       history.range[0] >= item.range[0] &&
-    //       history.range[0] <= item.range[1]) ||
-    //     (history.range[1] >= item.range[0] &&
-    //       history.range[1] <= item.range[1]) ||
-    //     (item.range[0] >= history.range[0] &&
-    //       item.range[0] <= history.range[1]) ||
-    //     (item.range[1] >= history.range[0] && item.range[1] <= history.range[1])
-    // );
-
-    // if (isDuplicate) {
-    //   Toast("Duplicate entry detected, unable to save.", "error");
-    //   return; // Exit if a duplicate is found
-    // }
-
-    // If validation passes, dispatch the action to add history
-    dispatch(addHistory(history));
-    Toast("Save History", "success");
+    Toast("Please select a question first", "error");
   };
 
   return (
@@ -270,8 +249,8 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
         videoSrc={videoSrc}
         isFetching={isFetching}
         keyframeIndex={keyframeIndex}
-        video_id={videoId || ""}
-        group_id={groupId || ""}
+        video_id={videoId ?? ""}
+        group_id={groupId ?? ""}
         handleCaptureKeyframe={handleCaptureKeyframe}
         handleSaveHistory={handleSaveHistory}
       />
@@ -293,7 +272,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
         {group === "video" &&
           imageGroup?.map((group, groupIndex) => (
             <Collapse
-              key={groupIndex}
+              key={`collapse video ${group.group_id} ${groupIndex}`}
               style={{ width: "100%" }}
               size="small"
               activeKey={defaultActiveGroupKey}
@@ -305,10 +284,13 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                 {group.videos.map((video, videoIndex) => (
                   <>
                     <Divider orientation="left">{`Video ${video.video_id}`}</Divider>
-                    <Row gutter={[16, 16]} key={videoIndex}>
-                      {video.keyframes.map((keyframe, keyframeIndex) => (
+                    <Row
+                      gutter={[16, 16]}
+                      key={`row video ${video.video_id} ${videoIndex} ${group.group_id}`}
+                    >
+                      {video.keyframes.map((keyframe, _) => (
                         <Col
-                          key={keyframeIndex}
+                          key={`col video ${video.video_id} ${group.group_id} ${keyframe.key}`}
                           xs={24}
                           sm={12}
                           md={8}
@@ -336,9 +318,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               {/* @ts-ignore */}
                               <Image
                                 preview={
-                                  temporalSearchEnabled && mode !== "temporal"
-                                    ? false
-                                    : true
+                                  !temporalSearchEnabled || mode === "temporal"
                                 }
                                 src={formatImagePath(keyframe.value)}
                               />
@@ -348,8 +328,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                             {renderRank(keyframe.confidence)}
                             <Divider type="vertical"></Divider>
                             {keyframe.value.split("/").pop()}
-                            {/* <Divider type="vertical"></Divider>
-                            {keyframe.key} */}
                             <Divider type="vertical"></Divider>
                             <Button
                               type="primary"

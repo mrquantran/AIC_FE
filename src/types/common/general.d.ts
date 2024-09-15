@@ -56,10 +56,25 @@ export type TOptionSelect = {
   value: string;
   [key: string]: string;
 };
+export interface THistory {
+  range: [number, number];
+  answer?: string;
+  videoId: number;
+  groupId: number;
+}
 
 export type TQuestion = {
   fileName: string;
   type: "qa" | "kis";
   number: number;
   content: string;
+  history: THistory[];
 };
+
+export interface IImage {
+  key: string;
+  value: string;
+  confidence: number;
+  video_id: number;
+  group_id: number;
+}

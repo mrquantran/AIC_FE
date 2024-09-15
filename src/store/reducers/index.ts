@@ -7,11 +7,18 @@ import persistReducer from 'redux-persist/es/persistReducer';
 const appPersistSettingConfig = {
   key: "appState",
   storage: storage,
-  whitelist: ["settings", "objectNames", "history", "searchHistory"],
+  whitelist: ["settings", "objectNames", "history"],
+  blacklist: [],
+};
+
+const searchPersistSettingConfig = {
+  key: "searchState",
+  storage: storage,
+  whitelist: ["searchParams", "searchResults"],
   blacklist: [],
 };
 
 export default combineReducers({
   appState: persistReducer(appPersistSettingConfig, appState),
-  searchState
+  searchState: persistReducer(searchPersistSettingConfig, searchState),
 })

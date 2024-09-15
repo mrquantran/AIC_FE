@@ -1,45 +1,46 @@
-import { createAction } from 'typesafe-actions'
-import { TAppState } from '../reducers/app.reducers'
-import { TQuestion } from '@/types'
+import { createAction } from "typesafe-actions";
+import { TAppState } from "../reducers/app.reducers";
+import { THistory, TQuestion } from "@/types";
 
 export const setAppError = createAction(
-  '@api/SET_APP_FAILURE',
+  "@api/SET_APP_FAILURE",
   (error: string) => error
-)()
+)();
 
 export const setAppSettings = createAction(
-  '@api/SET_ONE_FIELD_APP_SETTINGS',
-  (field: keyof TAppState['settings'], value: TAppState['settings'][keyof TAppState['settings']]) => ({ field, value })
-)()
+  "@api/SET_ONE_FIELD_APP_SETTINGS",
+  (
+    field: keyof TAppState["settings"],
+    value: TAppState["settings"][keyof TAppState["settings"]]
+  ) => ({ field, value })
+)();
 
 export const setTemporalSearchEnabled = createAction(
-  '@api/SET_TEMPORAL_SEARCH_ENABLED',
+  "@api/SET_TEMPORAL_SEARCH_ENABLED",
   (enabled: boolean) => enabled
-)()
+)();
 
 export const setObjectNames = createAction(
-  '@api/SET_OBJECT_NAMES',
+  "@api/SET_OBJECT_NAMES",
   (objectNames: string[]) => objectNames
-)()
+)();
 
 export const setModeTab = createAction(
-  '@api/SET_MODE_TAB',
-  (modeTab: TAppState['modeTab']) => modeTab
-)()
+  "@api/SET_MODE_TAB",
+  (modeTab: TAppState["modeTab"]) => modeTab
+)();
 
 export const addHistory = createAction(
-  '@api/ADD_HISTORY',
-  (history: TAppState['history'][0]) => history
-)()
+  "@api/ADD_HISTORY",
+  (history: THistory, selectedQuestion: TQuestion) => ({ history, selectedQuestion })
+)();
 
-export const clearHistory = createAction(
-  '@api/CLEAR_HISTORY'
-)()
+export const clearHistory = createAction("@api/CLEAR_HISTORY")();
 
 export const clearOneHistory = createAction(
-  '@api/CLEAR_ONE_HISTORY',
+  "@api/CLEAR_ONE_HISTORY",
   (index: number) => index
-)()
+)();
 
 export const setQuestions = createAction(
   "@api/SET_QUESTIONS",
@@ -51,6 +52,4 @@ export const setSelectedQuestion = createAction(
   (question: TQuestion) => question
 )();
 
-export const clearSearchHistory = createAction(
-  "@v/CLEAR_SEARCH_HISTORY"
-)();
+export const clearSearchHistory = createAction("@v/CLEAR_SEARCH_HISTORY")();

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import {
   Modal,
   Spin,
@@ -21,7 +21,6 @@ import {
   SaveOutlined,
   CaretRightOutlined,
 } from "@ant-design/icons";
-import { Slider } from "antd";
 
 interface IVideoModalProps {
   isModalVisible: boolean;
@@ -174,9 +173,7 @@ const VideoModal = ({
   };
 
   const handleSaveRange = () => {
-    if (range[0] && range[1]) {
-      handleSaveHistory([range[0] * 25, range[1] * 25], answer);
-    }
+    handleSaveHistory([currentKeyframe, currentKeyframe + getnFrames], answer);
   };
 
   return (
