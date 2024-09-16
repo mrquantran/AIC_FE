@@ -16,7 +16,7 @@ const Sidebar: Preact.FunctionComponent<TSideBarProps> = ({
   const defaultPath = RootPaths.DASHBOARD;
   const selectedKey =
     items?.find((item) => location.pathname.includes(item.path))
-      ?.path || defaultPath;
+      ?.path ?? defaultPath;
   console.log(selectedKey);
   useEffect(() => {
     if (!location.pathname) {
@@ -32,7 +32,11 @@ const Sidebar: Preact.FunctionComponent<TSideBarProps> = ({
     })) || [];
 
   return (
-    <Layout.Sider background={colorBgContainer} collapsed={true} theme="light">
+    <Layout.Sider
+      background={colorBgContainer}
+      collapsed={true}
+      theme="light"
+    >
       <Menu
         items={sidebarItems}
         onClick={onPathChange}

@@ -196,11 +196,13 @@ const BuidlingBar: Preact.FunctionComponent = () => {
   };
 
   return (
-    <Layout.Sider theme="light" width="25%">
-      {/* <Flex style={{ margin: "0 1rem" }} align="center" justify="space-between">
-        <Button onClick={previewModal}>Preview</Button>
-        <Tag color="blue">{items.length}</Tag>
-      </Flex> */}
+    <Layout.Sider
+      theme="light"
+      width="25%"
+      style={{
+        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <Flex
         style={{ margin: "1rem 0.5rem 0rem" }}
         align="center"

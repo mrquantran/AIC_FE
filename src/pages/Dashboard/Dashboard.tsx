@@ -4,15 +4,17 @@ import {
   Flex,
   Radio,
   Select,
-  Tag,
   Col,
   Row,
   Statistic,
   Tree,
   Empty,
+  Button,
+  Space,
+  TreeSelect,
+  Modal,
 } from "antd";
 import { useMemo, useState } from "preact/hooks";
-import { StyledFlex } from "@/theme/styled";
 import ImageGallery from "@/components/ImageGallery";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
@@ -20,14 +22,24 @@ import {
   FolderOutlined,
   YoutubeOutlined,
   FileImageOutlined,
+  CloseCircleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
-import type { TreeDataNode } from "antd";
-import { mapSearchResultsToTree } from "./Dashboard.utils";
+import type { TreeDataNode, TreeSelectProps } from "antd";
 import {
+  mapSearchResultsToTree,
+  mapSearchResultstoTreeSearch,
+  TTreeSearch,
+} from "./Dashboard.utils";
+import {
+  clearFilterIndexes,
   setClearTemporalSearch,
+  setFilterIndexes,
   setModeTab,
   setSelectedTemporalQuery,
 } from "@/store/actions";
+import { IImage } from "@/types";
+import Toast from "@/components/Toast";
 
 export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
@@ -35,7 +47,9 @@ export const Dashboard: React.FC = (): JSX.Element => {
   );
   const [selectTop, setSelectTop] = useState<number>(24);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
-
+  const filterIndexes = useSelector(
+    (state: TAppRootReducer) => state.searchState.filterIndexes
+  );
   const searchResult = useSelector(
     (state: TAppRootReducer) => state.searchState.searchResult
   );
@@ -60,6 +74,11 @@ export const Dashboard: React.FC = (): JSX.Element => {
 
   const treeData: TreeDataNode[] = useMemo(
     () => mapSearchResultsToTree(searchResult),
+    [searchResult]
+  );
+
+  const treeSearchData: TTreeSearch[] = useMemo(
+    () => mapSearchResultstoTreeSearch(searchResult),
     [searchResult]
   );
 
@@ -124,6 +143,65 @@ export const Dashboard: React.FC = (): JSX.Element => {
     dispatch(setSelectedTemporalQuery(temporalQuery));
   };
 
+  const handleSelectFilterIndexes = (indexes: number[]) => {
+    // if indexes is have in filterIndexes, remove it
+    // check all indexes in filterIndexes
+    dispatch(setFilterIndexes(indexes));
+  };
+
+  const handleTreeSelectChange: TreeSelectProps["onChange"] = (
+    selectedKeys
+  ) => {
+    const indexes: number[] = [];
+
+    const processSelectedKeys = (
+      selectedKeys: string[],
+      searchResults: IImage[]
+    ) => {
+      selectedKeys.forEach((key) => {
+        const [groupPart, videoPart, framePart] = key.split(",");
+
+        if (framePart) {
+          // Trường hợp chọn frame cụ thể
+          const frameKey = parseInt(framePart.replace("keyframe", ""));
+          if (!isNaN(frameKey)) indexes.push(frameKey);
+        } else if (videoPart) {
+          // Trường hợp chọn video
+          const groupId = parseInt(groupPart.replace("group", ""));
+          const videoId = parseInt(videoPart.replace("video", ""));
+          if (!isNaN(groupId) && !isNaN(videoId)) {
+            const videoKeys = searchResults
+              .filter(
+                (item) => item.group_id === groupId && item.video_id === videoId
+              )
+              .map((item) => item.key);
+            indexes.push(...videoKeys);
+          }
+        } else {
+          // Trường hợp chọn group
+          const groupId = parseInt(groupPart.replace("group", ""));
+          if (!isNaN(groupId)) {
+            const groupKeys = searchResults
+              .filter((item) => item.group_id === groupId)
+              .map((item) => item.key);
+            indexes.push(...groupKeys);
+          }
+        }
+      });
+    };
+
+    // Giả sử searchResults là một state hoặc prop có sẵn trong component
+    processSelectedKeys(selectedKeys as string[], searchResult.data);
+    const indexwithFilter = [...filterIndexes, ...indexes];
+
+    // Loại bỏ các giá trị trùng lặp và sắp xếp
+    const uniqueSortedIndexes = [...new Set(indexwithFilter)].sort(
+      (a, b) => a - b
+    );
+
+    dispatch(setFilterIndexes(uniqueSortedIndexes));
+  };
+
   return (
     <>
       {/* @ts-ignore */}
@@ -171,6 +249,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
             <p style={{ marginBottom: "0.8rem", fontWeight: "bold" }}>
               Search Summary
             </p>
+            {/* @ts-ignore */}
             <Flex gap="middle" horizontal justify={noResult && "center"}>
               {searchResult && searchResult?.data.length === 0 ? (
                 <Empty />
@@ -235,16 +314,42 @@ export const Dashboard: React.FC = (): JSX.Element => {
       <Card
         title="Key Frame Searching"
         extra={
-          <StyledFlex>
+          <Flex align="center" gap={15}>
+            <Space.Compact>
+              <Button
+                icon={<EyeOutlined />}
+                onClick={() =>
+                  Modal.info({
+                    title: "Filter Indexes",
+                    content: filterIndexes.join(", "),
+                  })
+                }
+              />
+              <Button
+                icon={<CloseCircleOutlined />}
+                onClick={() => {
+                  dispatch(clearFilterIndexes());
+                  Toast("Clear filter indexes", "success");
+                }}
+              />
+              <TreeSelect
+                treeData={treeSearchData}
+                treeCheckable={true}
+                showCheckedStrategy={TreeSelect.SHOW_PARENT}
+                placeholder="Please select"
+                style={{ width: "20vh" }}
+                maxTagCount={"responsive"}
+                onChange={handleTreeSelectChange}
+                treeIcon={true}
+              />
+            </Space.Compact>
+
             <Radio.Group onChange={handleModeChange} value={modeTab}>
               <Radio.Button value="image">Image</Radio.Button>
               {/* <Radio.Button value="table">Table</Radio.Button> */}
               <Radio.Button value="temporal">Temporal</Radio.Button>
             </Radio.Group>
-            <Tag color="magenta" style={{ marginLeft: "1rem" }}>
-              {searchResult.total} images
-            </Tag>
-          </StyledFlex>
+          </Flex>
         }
       >
         {modeTab === "image" && (
@@ -254,7 +359,6 @@ export const Dashboard: React.FC = (): JSX.Element => {
             images={searchResult?.data}
           />
         )}
-        {/* {modeTab === "table" && <Table data={searchResult?.data} />} */}
         {modeTab === "temporal" && (
           <ImageGallery
             handleImageClick={handleImageClick}

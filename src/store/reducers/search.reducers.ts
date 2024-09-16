@@ -22,6 +22,7 @@ export type TSearchState = {
   temporalSearch: string[];
   search: TSearch[];
   disabledTabs: number[];
+  filterIndexes: number[];
 };
 
 const defaultSearchState: TSearch[] = [
@@ -50,6 +51,7 @@ export const getInitialSearchState = () => {
       selectedQuestion: null,
       questions: [],
     },
+    filterIndexes: [],
   };
 };
 
@@ -60,6 +62,20 @@ export default (
   action: TSearchActionType
 ): TSearchState => {
   switch (action.type) {
+    case getType(actions.clearFilterIndexes):
+      return update(state, {
+        filterIndexes: {
+          $set: [],
+        },
+      });
+    case getType(actions.setFilterIndexes):
+      // set unique filter indexes
+      const uniqueFilterIndexes = Array.from(new Set(action.payload));
+      return update(state, {
+        filterIndexes: {
+          $set: uniqueFilterIndexes,
+        },
+      });
     case getType(actions.setSearchTerm): {
       const index = state.search.findIndex(
         (s) => s.tabKey === action.payload.tabKey

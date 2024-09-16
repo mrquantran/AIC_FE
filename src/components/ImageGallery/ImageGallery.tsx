@@ -1,4 +1,9 @@
-import Preact, { useEffect, useMemo, useState } from "preact/compat";
+import Preact, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/compat";
 import {
   Col,
   Collapse,
@@ -9,9 +14,14 @@ import {
   Button,
   Flex,
   Tooltip,
+  Typography,
 } from "antd";
 import "./ImageGallery.scss"; // Import the CSS file
-import { PlayCircleOutlined } from "@ant-design/icons";
+import {
+  PlayCircleOutlined,
+  MinusSquareOutlined,
+  PlusSquareOutlined,
+} from "@ant-design/icons";
 import { useVideoStream } from "@/api/hooks/video";
 import VideoModal from "../VideoModal";
 import {
@@ -21,10 +31,12 @@ import {
 } from "./ImageGallery.utils";
 import { useDispatch, useSelector } from "react-redux";
 import { TAppRootReducer } from "@/store";
-import { addHistory } from "@/store/actions";
+import { addHistory, setFilterIndexes } from "@/store/actions";
 import { useSearchNearestIndexFromKeyframe } from "@/api/hooks/search";
 import Toast from "../Toast";
 import { IImage, THistory } from "@/types";
+
+const { Text } = Typography;
 
 export interface IImageGalleryProps {
   images: IImage[];
@@ -56,6 +68,9 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
   const [keyframeIndex, setKeyframeIndex] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const filterIndexes = useSelector(
+    (state: TAppRootReducer) => state.searchState.filterIndexes
+  );
   const mode = useSelector((state: TAppRootReducer) => state.appState.modeTab);
   const temporalSearchEnabled = useSelector(
     (state: TAppRootReducer) => state.appState.temporalSearchEnabled
@@ -236,6 +251,28 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
 
   const isPreviewEnabled = !(temporalSearchEnabled && mode !== "temporal");
 
+  const handleClickFilterIndexesButton = (indexes: number[]) => {
+    const newIndex = [...filterIndexes, ...indexes];
+    dispatch(setFilterIndexes(newIndex));
+    Toast("Added to filter lists oke. Try again", "success");
+  };
+
+  const handleClickPlusIndexes = (indexes: number[]) => {
+    const newIndex = filterIndexes.filter((item) => !indexes.includes(item));
+    dispatch(setFilterIndexes(newIndex));
+    Toast("Removed from filter lists oke. Try again", "success");
+  };
+
+  const isMarked = useCallback(
+    (frames: number[]) => frames.some((frame) => filterIndexes.includes(frame)),
+    [filterIndexes]
+  );
+
+  const isKeyframeMarked = useMemo(
+    () => (keyframe: number) => filterIndexes.includes(keyframe),
+    [filterIndexes]
+  );
+
   return (
     <>
       <VideoModal
@@ -277,97 +314,79 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                 header={`Group ${group.group_id}`}
                 key={`${group.group_id}-${groupIndex}`}
               >
-                {group.videos.map((video, videoIndex) => (
-                  <>
-                    <Divider orientation="left">{`Video ${video.video_id}`}</Divider>
-                    <Row
-                      gutter={[16, 16]}
-                      key={`row video ${video.video_id} ${videoIndex} ${group.group_id}`}
-                    >
-                      {video.keyframes.map((keyframe, _) => (
-                        <Col
-                          key={`col video ${video.video_id} ${group.group_id} ${keyframe.key}`}
-                          xs={24}
-                          sm={12}
-                          md={8}
-                          lg={6}
-                          xl={4}
-                        >
-                          <Tooltip
-                            title={`${keyframe.key}`}
-                            placement="topLeft"
-                          >
-                            <div
-                              className={`image-wrapper ${isIncludeTemporalSearch(
-                                formatTemporalSearch(
-                                  keyframe.value,
-                                  keyframe.key
-                                )
-                              )}
-                                  ? "selected"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                handleImageClick &&
-                                handleImageClick(
-                                  keyframe.key,
-                                  keyframe.value,
-                                  mode
-                                )
-                              }
-                            >
-                              {/* @ts-ignore */}
-                              <Image
-                                preview={isPreviewEnabled}
-                                src={formatImagePath(keyframe.value)}
-                              />
-                            </div>
-                          </Tooltip>
-                          <Flex justify="center" align="center">
-                            {renderRank(keyframe.confidence)}
-                            <Divider type="vertical"></Divider>
-                            {keyframe.value.split("/").pop()}
-                            <Divider type="vertical"></Divider>
+                {group.videos.map((video, videoIndex) => {
+                  const indexes = video?.keyframes.map((keyframe) =>
+                    parseInt(keyframe.key)
+                  );
+                  return (
+                    <>
+                      <Divider orientation="left">
+                        <Text>Video {video.video_id}</Text>
+                        {isMarked(indexes) ? (
+                          <Tooltip title="Remove from filter">
                             <Button
-                              type="primary"
-                              size="small"
-                              // shape="circle"
-                              onClick={() =>
-                                handlePlayVideo(
-                                  video.video_id.toString(),
-                                  group.group_id.toString(),
-                                  keyframe.value
-                                )
+                              onClick={() => handleClickPlusIndexes(indexes)}
+                              type="text"
+                              icon={
+                                <PlusSquareOutlined
+                                  style={{
+                                    cursor: "pointer",
+                                  }}
+                                />
                               }
-                              icon={<PlayCircleOutlined />}
                             />
-                          </Flex>
-                        </Col>
-                      ))}
-
-                      {captureKeyframe.map((keyframe, keyframeIndex) => {
-                        if (
-                          keyframe.groupId === group.group_id.toString() &&
-                          keyframe.videoId === video.video_id.toString()
-                        ) {
-                          return (
-                            <Col
-                              key={keyframeIndex}
-                              xs={24}
-                              sm={12}
-                              md={8}
-                              lg={6}
-                              xl={4}
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Add to filter">
+                            <Button
+                              onClick={() =>
+                                handleClickFilterIndexesButton(indexes)
+                              }
+                              type="text"
+                              icon={
+                                <MinusSquareOutlined
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "red",
+                                  }}
+                                />
+                              }
+                            />
+                          </Tooltip>
+                        )}
+                      </Divider>
+                      <Row
+                        gutter={[16, 16]}
+                        key={`row video ${video.video_id} ${videoIndex} ${group.group_id}`}
+                      >
+                        {video.keyframes.map((keyframe, _) => (
+                          <Col
+                            key={`col video ${video.video_id} ${group.group_id} ${keyframe.key}`}
+                            xs={24}
+                            sm={12}
+                            md={8}
+                            lg={6}
+                            xl={4}
+                          >
+                            <Tooltip
+                              title={`${keyframe.key}`}
+                              placement="topLeft"
                             >
                               <div
                                 className={`image-wrapper ${isIncludeTemporalSearch(
-                                  `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
-                                )}`}
+                                  formatTemporalSearch(
+                                    keyframe.value,
+                                    keyframe.key
+                                  )
+                                )}
+                                  ? "selected"
+                                  : ""
+                              }`}
                                 onClick={() =>
                                   handleImageClick &&
                                   handleImageClick(
-                                    keyframe?.index?.toString() ?? "",
-                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe.keyframe}`,
+                                    keyframe.key,
+                                    keyframe.value,
                                     mode
                                   )
                                 }
@@ -375,14 +394,27 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                 {/* @ts-ignore */}
                                 <Image
                                   preview={isPreviewEnabled}
-                                  src={formatImagePath(keyframe.image ?? "")}
+                                  src={formatImagePath(keyframe.value)}
                                 />
                               </div>
-                              <Flex justify="center" align="center">
-                                {renderRank(0)}
-                                <Divider type="vertical"></Divider>
-                                {keyframe.keyframe}
-                                <Divider type="vertical"></Divider>
+                            </Tooltip>
+                            <Flex justify="center" align="center">
+                              <Text strong>{keyframe.confidence}</Text>
+                              <Divider type="vertical"></Divider>
+                              <p
+                                style={
+                                  isKeyframeMarked(parseInt(keyframe.key))
+                                    ? {
+                                        color: "red",
+                                        textDecoration: "line-through",
+                                      }
+                                    : {}
+                                }
+                              >
+                                {keyframe.value.split("/").pop()}
+                              </p>
+                              <Divider type="vertical"></Divider>
+                              <Tooltip title="Play video">
                                 <Button
                                   type="primary"
                                   size="small"
@@ -391,19 +423,76 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                     handlePlayVideo(
                                       video.video_id.toString(),
                                       group.group_id.toString(),
-                                      keyframe.keyframe.toString()
+                                      keyframe.value
                                     )
                                   }
                                   icon={<PlayCircleOutlined />}
                                 />
-                              </Flex>
-                            </Col>
-                          );
-                        }
-                      })}
-                    </Row>
-                  </>
-                ))}
+                              </Tooltip>
+                            </Flex>
+                          </Col>
+                        ))}
+
+                        {captureKeyframe.map((keyframe, keyframeIndex) => {
+                          if (
+                            keyframe.groupId === group.group_id.toString() &&
+                            keyframe.videoId === video.video_id.toString()
+                          ) {
+                            return (
+                              <Col
+                                key={keyframeIndex}
+                                xs={24}
+                                sm={12}
+                                md={8}
+                                lg={6}
+                                xl={4}
+                              >
+                                <div
+                                  className={`image-wrapper ${isIncludeTemporalSearch(
+                                    `${keyframe.groupId}/${keyframe.videoId}/${keyframe?.index}`
+                                  )}`}
+                                  onClick={() =>
+                                    handleImageClick &&
+                                    handleImageClick(
+                                      keyframe?.index?.toString() ?? "",
+                                      `${keyframe.groupId}/${keyframe.videoId}/${keyframe.keyframe}`,
+                                      mode
+                                    )
+                                  }
+                                >
+                                  {/* @ts-ignore */}
+                                  <Image
+                                    preview={isPreviewEnabled}
+                                    src={formatImagePath(keyframe.image ?? "")}
+                                  />
+                                </div>
+                                <Flex justify="center" align="center">
+                                  {renderRank(0)}
+                                  <Divider type="vertical"></Divider>
+                                  {keyframe.keyframe}
+                                  <Divider type="vertical"></Divider>
+                                  <Button
+                                    type="primary"
+                                    size="small"
+                                    // shape="circle"
+                                    onClick={() =>
+                                      handlePlayVideo(
+                                        video.video_id.toString(),
+                                        group.group_id.toString(),
+                                        keyframe.keyframe.toString()
+                                      )
+                                    }
+                                    icon={<PlayCircleOutlined />}
+                                  />
+                                </Flex>
+                              </Col>
+                            );
+                          }
+                        })}
+                      </Row>
+                    </>
+                  );
+                })}
               </Collapse.Panel>
             </Collapse>
           ))}

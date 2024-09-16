@@ -64,3 +64,10 @@ export const setDisabledTabs = createAction(
 export const setClearTemporalSearch = createAction(
   "@search/SET_CLEAR_TEMPORAL_SEARCH"
 )();
+
+export const setFilterIndexes = createAction(
+  "@search/SET_FILTER_INDEXES",
+  (indexes: number[]) => indexes
+)();
+
+export const clearFilterIndexes = createAction("@search/CLEAR_FILTER_INDEXES")();

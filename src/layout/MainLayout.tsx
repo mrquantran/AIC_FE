@@ -51,6 +51,8 @@ const StyledHeader = styled(Layout.Header)<{ background: string }>`
   align-items: center;
   padding: 0 16px;
   justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
 `;
 
 const StyledLayout = styled(Layout)`
@@ -151,10 +153,15 @@ const MainLayout: React.FC = () => {
     }
   };
 
+  const filterIndexes = useSelector(
+    (state: TAppRootReducer) => state.searchState.filterIndexes
+  );
+
   const { mutate, data, isSuccess, isPending } = useSearchKeyframes({
     vector_search: settings.vectorSearch,
     k_query: settings.kQuery,
     display: settings.display,
+    filter_indexes: filterIndexes,
   });
 
   useEffect(() => {
@@ -228,7 +235,7 @@ const MainLayout: React.FC = () => {
 
   const handleClickTryButton = () => {
     Toast("Prepare new query", "success", "top-start");
-    dispatch(trySearchQuery(currentSelectedQuestion?.content || ""));
+    dispatch(trySearchQuery(currentSelectedQuestion?.content ?? ""));
   };
 
   const handleTemporalEnabled = () => {

@@ -9,6 +9,7 @@ export type TSearchParams = {
   vector_search: "faiss" | "usearch";
   k_query: number;
   display: number
+  filter_indexes: number[];
 };
 
 export type TSearchNearestIndexFromKeyframePayload = {

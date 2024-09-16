@@ -72,7 +72,7 @@ export type TQuestion = {
 };
 
 export interface IImage {
-  key: string;
+  key: number;
   value: string;
   confidence: number;
   video_id: number;
