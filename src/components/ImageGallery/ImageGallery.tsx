@@ -275,18 +275,20 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
 
   return (
     <>
-      <VideoModal
-        videoTitle={`Group ${groupId} - Video ${videoId}`}
-        isModalVisible={isModalVisible}
-        handleModalClose={handleModalClose}
-        videoSrc={videoSrc}
-        isFetching={isFetching}
-        keyframeIndex={keyframeIndex}
-        video_id={videoId ?? ""}
-        group_id={groupId ?? ""}
-        handleCaptureKeyframe={handleCaptureKeyframe}
-        handleSaveHistory={handleSaveHistory}
-      />
+      
+        <VideoModal
+          videoTitle={`Group ${groupId} - Video ${videoId}`}
+          isModalVisible={isModalVisible}
+          handleModalClose={handleModalClose}
+          videoSrc={videoSrc}
+          isFetching={isFetching}
+          keyframeIndex={keyframeIndex}
+          video_id={videoId ?? ""}
+          group_id={groupId ?? ""}
+          handleCaptureKeyframe={handleCaptureKeyframe}
+          handleSaveHistory={handleSaveHistory}
+        />
+      
       <Row gutter={[16, 16]}>
         {group === "all" &&
           image_sorted?.map((image) => (
@@ -311,48 +313,68 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
               activeKey={defaultActiveGroupKey}
             >
               <Collapse.Panel
-                header={`Group ${group.group_id}`}
+                header={
+                  <>
+                    <Text>Group {group.group_id}</Text>
+                    <Button
+                      onClick={() =>
+                        handleClickFilterIndexesButton(
+                          group.videos
+                            .map((video) =>
+                              video.keyframes.map((keyframe) => keyframe.key)
+                            )
+                            .flat()
+                        )
+                      }
+                      type="text"
+                      icon={
+                        <MinusSquareOutlined
+                          style={{
+                            cursor: "pointer",
+                            color: "red",
+                          }}
+                        />
+                      }
+                    />
+                  </>
+                }
                 key={`${group.group_id}-${groupIndex}`}
               >
                 {group.videos.map((video, videoIndex) => {
-                  const indexes = video?.keyframes.map((keyframe) =>
-                    parseInt(keyframe.key)
+                  const indexes = video?.keyframes.map(
+                    (keyframe) => keyframe.key
                   );
                   return (
                     <>
                       <Divider orientation="left">
                         <Text>Video {video.video_id}</Text>
                         {isMarked(indexes) ? (
-                          <Tooltip title="Remove from filter">
-                            <Button
-                              onClick={() => handleClickPlusIndexes(indexes)}
-                              type="text"
-                              icon={
-                                <PlusSquareOutlined
-                                  style={{
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              }
-                            />
-                          </Tooltip>
+                          <Button
+                            onClick={() => handleClickPlusIndexes(indexes)}
+                            type="text"
+                            icon={
+                              <PlusSquareOutlined
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                              />
+                            }
+                          />
                         ) : (
-                          <Tooltip title="Add to filter">
-                            <Button
-                              onClick={() =>
-                                handleClickFilterIndexesButton(indexes)
-                              }
-                              type="text"
-                              icon={
-                                <MinusSquareOutlined
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "red",
-                                  }}
-                                />
-                              }
-                            />
-                          </Tooltip>
+                          <Button
+                            onClick={() =>
+                              handleClickFilterIndexesButton(indexes)
+                            }
+                            type="text"
+                            icon={
+                              <MinusSquareOutlined
+                                style={{
+                                  cursor: "pointer",
+                                  color: "red",
+                                }}
+                              />
+                            }
+                          />
                         )}
                       </Divider>
                       <Row
@@ -376,7 +398,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                 className={`image-wrapper ${isIncludeTemporalSearch(
                                   formatTemporalSearch(
                                     keyframe.value,
-                                    keyframe.key
+                                    keyframe.key.toString()
                                   )
                                 )}
                                   ? "selected"
@@ -385,7 +407,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                 onClick={() =>
                                   handleImageClick &&
                                   handleImageClick(
-                                    keyframe.key,
+                                    keyframe.key.toString(),
                                     keyframe.value,
                                     mode
                                   )
@@ -403,7 +425,7 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                               <Divider type="vertical"></Divider>
                               <p
                                 style={
-                                  isKeyframeMarked(parseInt(keyframe.key))
+                                  isKeyframeMarked(keyframe.key)
                                     ? {
                                         color: "red",
                                         textDecoration: "line-through",
@@ -414,7 +436,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                 {keyframe.value.split("/").pop()}
                               </p>
                               <Divider type="vertical"></Divider>
-                              <Tooltip title="Play video">
                                 <Button
                                   type="primary"
                                   size="small"
@@ -428,7 +449,6 @@ const ImageGallery: Preact.FunctionComponent<IImageGalleryProps> = ({
                                   }
                                   icon={<PlayCircleOutlined />}
                                 />
-                              </Tooltip>
                             </Flex>
                           </Col>
                         ))}

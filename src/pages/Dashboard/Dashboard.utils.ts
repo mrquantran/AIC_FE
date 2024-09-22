@@ -89,7 +89,7 @@ export const mapSearchResultstoTreeSearch = (
           value: videoKey,
           title: `Video ${video.video_id}`,
           children: video.keyframes.map((keyframe) => {
-            const keyframeKey = `group${group.group_id},video${video.video_id},keyframe${keyframe.value}`;
+            const keyframeKey = `group${group.group_id},video${video.video_id},keyframe${keyframe.key}`;
             return {
               value: keyframeKey,
               title: `${keyframe.value.split("/").pop()}`,

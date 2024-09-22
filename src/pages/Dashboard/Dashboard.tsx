@@ -45,7 +45,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
   const modeTab = useSelector(
     (state: TAppRootReducer) => state.appState.modeTab
   );
-  const [selectTop, setSelectTop] = useState<number>(24);
+  const [selectTop, setSelectTop] = useState<number>(50);
   const [groupFromat, setGroupFormat] = useState<"all" | "video">("video");
   const filterIndexes = useSelector(
     (state: TAppRootReducer) => state.searchState.filterIndexes
@@ -77,10 +77,10 @@ export const Dashboard: React.FC = (): JSX.Element => {
     [searchResult]
   );
 
-  const treeSearchData: TTreeSearch[] = useMemo(
-    () => mapSearchResultstoTreeSearch(searchResult),
-    [searchResult]
-  );
+  // const treeSearchData: TTreeSearch[] = useMemo(
+  //   () => mapSearchResultstoTreeSearch(searchResult),
+  //   [searchResult]
+  // );
 
   const noResult = searchResult && searchResult?.data.length === 0;
 
@@ -192,14 +192,10 @@ export const Dashboard: React.FC = (): JSX.Element => {
 
     // Giả sử searchResults là một state hoặc prop có sẵn trong component
     processSelectedKeys(selectedKeys as string[], searchResult.data);
-    const indexwithFilter = [...filterIndexes, ...indexes];
-
     // Loại bỏ các giá trị trùng lặp và sắp xếp
-    const uniqueSortedIndexes = [...new Set(indexwithFilter)].sort(
-      (a, b) => a - b
-    );
+    const uniqueSortedIndexes = [...new Set(indexes)].sort((a, b) => a - b);
 
-    dispatch(setFilterIndexes(uniqueSortedIndexes));
+    dispatch(setFilterIndexes([...filterIndexes, ...uniqueSortedIndexes]));
   };
 
   return (
@@ -215,19 +211,31 @@ export const Dashboard: React.FC = (): JSX.Element => {
               style={{ width: "100%" }}
               title={`Top ${selectTop.toString()} rank image`}
               extra={
-                <Select
-                  value={selectTop}
-                  size="middle"
-                  onChange={handleChangeSelectTop}
-                  options={[
-                    { value: 5, label: "5" },
-                    { value: 10, label: "10" },
-                    { value: 24, label: "24" },
-                    { value: 15, label: "15" },
-                    { value: 30, label: "30" },
-                    { value: 50, label: "50" },
-                  ]}
-                />
+                <Flex align="center" gap={10}>
+                  <Button
+                    onClick={() =>
+                      handleSelectFilterIndexes([
+                        ...filterIndexes,
+                        ...searchResult?.data.map((item: IImage) => item.key),
+                      ])
+                    }
+                  >
+                    Ignore all
+                  </Button>
+                  <Select
+                    value={selectTop}
+                    size="middle"
+                    onChange={handleChangeSelectTop}
+                    options={[
+                      { value: 5, label: "5" },
+                      { value: 10, label: "10" },
+                      { value: 24, label: "24" },
+                      { value: 15, label: "15" },
+                      { value: 30, label: "30" },
+                      { value: 50, label: "50" },
+                    ]}
+                  />
+                </Flex>
               }
             >
               <ImageGallery
@@ -332,7 +340,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                   Toast("Clear filter indexes", "success");
                 }}
               />
-              <TreeSelect
+              {/* <TreeSelect
                 treeData={treeSearchData}
                 treeCheckable={true}
                 showCheckedStrategy={TreeSelect.SHOW_PARENT}
@@ -341,7 +349,7 @@ export const Dashboard: React.FC = (): JSX.Element => {
                 maxTagCount={"responsive"}
                 onChange={handleTreeSelectChange}
                 treeIcon={true}
-              />
+              /> */}
             </Space.Compact>
 
             <Radio.Group onChange={handleModeChange} value={modeTab}>
