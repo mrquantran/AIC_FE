@@ -269,6 +269,9 @@ const VideoModal = ({
                 style={{ width: "8vh" }}
                 onChange={(value: number) => setGetnFrames(value)}
               >
+                
+                <Select.Option value={1}>1</Select.Option>
+                <Select.Option value={5}>5</Select.Option>
                 <Select.Option value={10}>10</Select.Option>
                 <Select.Option value={25}>25</Select.Option>
                 <Select.Option value={50}>50</Select.Option>
